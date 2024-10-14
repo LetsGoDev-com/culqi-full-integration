@@ -27,43 +27,28 @@ class Refunds extends Client {
 	
 	/**
 	 * Create Refund
-	 * @param  string $charge_id
 	 * @param  integer $post_id
 	 * @param  float  $amount
 	 * @return bool
 	 */
-	public function create( int $postChargeID, array $args ): \stdClass {
+	public function create( array $args ): \stdClass {
 
-		$args   = \apply_filters( 'fullculqi/culqi_refunds/create/args', $args, $postChargeID );
+		$args   = \apply_filters( 'fullculqi/culqi_refunds/create/args', $args );
 		$refund = $this->requestPost( $args );
 
 		if ( ! $refund->success ) {
 			return $refund;
 		}
 
-		$data = $refund->data->body;
-
-		\update_post_meta( $postChargeID, 'culqi_data', $data );
-		\update_post_meta( $postChargeID, 'culqi_status', 'refunded' );
-
-		// Save Refund
-		$basic      = \get_post_meta( $postChargeID, 'culqi_basic', true );
-		$refundsIDs = \get_post_meta( $postChargeID, 'culqi_ids_refunded', true ) ?: [];
-		
-		$refundsIDs[ $data->id ] = \number_format( $data->amount / 100, 2, '.', '' );
-		
-		$basic['culqi_amount_refunded'] = \array_sum( $refundsIDs );
-
-		\update_post_meta( $postChargeID, 'culqi_basic', $basic );
-		\update_post_meta( $postChargeID, 'culqi_ids_refunded', $refundsIDs );
-
-		\do_action( 'fullculqi/culqi_refunds/create', $postChargeID, $refund );
+		\do_action( 'fullculqi/culqi_refunds/create', $refund->data->body );
 
 		return (object) \apply_filters( 'fullculqi/culqi_refunds/create/success', [
 			'success' => true,
 			'data'    => (object)[
-				'culqiRefundID' => $data->id,
-				'postChargeID'  => $postChargeID
+				'culqiRefundID'     => $refund->data->body->id,
+				'culqiChargeID'     => $refund->data->body->charge_id,
+				'culqiRefundAmount' => $refund->data->body->amount,
+				'culqiRefundReason' => $refund->data->body->reason,
 			]
 		] );
 	}

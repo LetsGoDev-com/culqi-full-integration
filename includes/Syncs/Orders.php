@@ -39,7 +39,7 @@ class Orders extends Client {
 			return $order;
 		}
 
-		\do_action( \sprintf( 'fullculqi/%s/create', $this->postType ), $order );
+		\do_action( \sprintf( 'fullculqi/%s/create', $this->postType ), $order->data->body );
 
 		return (object) \apply_filters( \sprintf( 'fullculqi/%s/create/success', $this->postType ), [
 			'success' => true,
@@ -52,7 +52,7 @@ class Orders extends Client {
 	 * @param  array  $args
 	 * @return mixed
 	 */
-	public function afterConfirm( int $culqiOrderID, array $metadata ): \stdClass {
+	public function afterConfirm( string $culqiOrderID, array $metadata ): \stdClass {
 
 		$order = $this->requestPost( [ 'metadata' => $metadata ], $culqiOrderID );
 
@@ -63,7 +63,9 @@ class Orders extends Client {
 		// Update post
 		$postID = $this->createWPPost( $order->data->body );
 
-		\do_action( \sprintf( 'fullculqi/%s/after_confirm', $this->postType ), $order );
+		\do_action(
+			\sprintf( 'fullculqi/%s/after_confirm', $this->postType ), $postID, $order->data->body
+		);
 
 		return (object) \apply_filters(
 			\sprintf( 'fullculqi/%s/after_confirm/success', $this->postType ), [

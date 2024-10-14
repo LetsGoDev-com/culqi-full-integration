@@ -88,7 +88,7 @@ Con este plugin podrás:
 
 = Github =
 
-Fork me in [https://github.com/gonzalesc/wp-culqi-integration.git](https://github.com/gonzalesc/wp-culqi-integration.git)
+Fork me in [https://github.com/LetsGoDev-com/culqi-full-integration](https://github.com/LetsGoDev-com/culqi-full-integration)
 
 = Available Languages =
 

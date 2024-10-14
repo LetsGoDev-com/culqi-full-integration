@@ -28,7 +28,8 @@ class FullCulqi_WC_Admin {
 		add_action( 'fullculqi/culqi_charges/sync/loop', [ $this, 'link_to_wc_orders' ], 10, 2 );
 
 		// Ajax Refund
-		add_filter( 'fullculqi/ajax/refund/process', [ $this, 'create_refund_process' ], 10, 2 );
+		add_filter( 'fullculqi/ajax/refund/is_external', '__return_true' );
+		add_filter( 'fullculqi/ajax/refund/process_external', [ $this, 'createRefundProcess' ] );
 	}
 
 	/**
@@ -175,46 +176,33 @@ class FullCulqi_WC_Admin {
 
 
 	/**
-	 * Create Refund
-	 * @param  stdClass $refund
+	 * Create Refund to WC
 	 * @param  integer $post_charge_id
 	 * @return mixed
 	 */
-	public function create_refund_process( ?stdClass $refund = null, int $postChargeID = 0 ) {
-
-		if ( empty( $postChargeID ) ) {
-			return (object)[
-				'success' => false,
-				'data'    => (object)[ 'message' => esc_html__( 'Post Charge empty', 'fullculqi' ) ]
-			];
-		}
+	public function createRefundProcess( int $postChargeID ): bool {
 
 		// WC Order ID
 		$orderID = get_post_meta( $postChargeID, 'culqi_wc_order_id', true );
 		$order 	 = wc_get_order( $orderID );
 
-		if ( ! $order ) {
-			return (object)[
-				'success' => false,
-				'data'    => (object)[ 'message' => esc_html__( 'WC Order doesnt exist', 'fullculqi' ) ]
-			];
+		if ( ! $order instanceof WC_Order ) {
+			return false;
 		}
-
-		$log = new FullCulqi_Logs( $order->get_id() );
 
 		// WC Refund
 		$basic = get_post_meta( $postChargeID, 'culqi_basic', true );
-
+	
 		$wcRefund = wc_create_refund( [
-			'amount'         => wc_format_decimal( $basic['culqi_amount'] ),
-			'reason'         => 'solicitud_comprador',
+			'amount'         => wc_format_decimal( $basic['culqi_current_amount'] ),
+			'reason'         => \esc_html__( 'Refund from Charge CPT', 'fullculqi' ),
 			'order_id'       => $orderID,
 			'line_items'     => [],
 			'refund_payment' => true,
 			'restock_items'  => true,
 		] );
 
-		return (object)[ 'success' => true ];
+		return true;
 	}
 }
 

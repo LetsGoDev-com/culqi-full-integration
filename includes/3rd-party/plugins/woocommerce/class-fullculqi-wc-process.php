@@ -44,7 +44,6 @@ class FullCulqi_WC_Process {
 		// Log
 		self::$log = new FullCulqi_Logs( $order->get_id() );
 
-
 		// Culqi Customer ID
 		$metadata = [
 			'cip_code'    => $postData['cip_code'],
@@ -52,14 +51,13 @@ class FullCulqi_WC_Process {
 			'wp_user_id'  => $order->get_customer_id() ?: 0,
 		];
 		
+		// Process Customer
+		self::customer( $order );
 
-		if ( self::customer( $order ) ) {
-		
-			//$culqiCustomerID = \get_post_meta( $order->get_id(), '_culqi_customer_id', true );
-			//$postCustomerID  = \get_post_meta( $order->get_id(), '_post_customer_id', true );
+		if ( Customers::getInstance()->haveCurrentItemIDs() ) {
 
-			$culqiCustomerID = $order->get_meta( '_culqi_customer_id' );
-			$postCustomerID  = $order->get_meta( '_post_customer_id' );
+			$culqiCustomerID = Customers::getInstance()->getCurrentItemID( 'culqi_customer_id' );
+			$postCustomerID  = Customers::getInstance()->getCurrentItemID( 'post_customer_id' );
 
 			if ( ! empty( $culqiCustomerID ) ) {
 				$metadata['culqi_customer_id'] = $culqiCustomerID;
@@ -86,7 +84,6 @@ class FullCulqi_WC_Process {
 		);
 
 		// Update CIP CODE in WC Order
-		//\update_post_meta( $order->get_id(), '_culqi_cip', $postData['cip_code'] );
 		$order->update_meta_data( '_culqi_cip', $postData['cip_code'] );
 
 		// From Culqi
@@ -116,13 +113,8 @@ class FullCulqi_WC_Process {
 		\update_post_meta( $postOrderID, 'culqi_wc_order_id', $order->get_id() );
 
 		// Update meta post in wc order
-		//\update_post_meta( $order->get_id(), '_post_order_id', $postOrderID );
 		$order->update_meta_data( '_post_order_id', $postOrderID );
-
-		// Update culqi id in wc order
-		//\update_post_meta( $order->get_id(), '_culqi_order_id', $culqiOrderID );
 		$order->update_meta_data( '_culqi_order_id', $culqiOrderID );
-
 		$order->save_meta_data();
 
 		return true;
@@ -146,10 +138,7 @@ class FullCulqi_WC_Process {
 		$order        = \wc_get_order( \absint( $postData['order_id'] ) );
 		$installments = \sanitize_text_field( $postData['installments'] );
 		$countryCode  = \sanitize_text_field( $postData['country_code'] );
-
-		if ( isset( $postData['token_id'] ) ) {
-			$token = \sanitize_text_field( $postData['token_id'] );
-		}
+		$token        = \sanitize_text_field( $postData['token_id'] ?? '' );
 
 		if ( ! $order instanceof \WC_Order ) {
 			return false;
@@ -158,11 +147,14 @@ class FullCulqi_WC_Process {
 		// Instance Logs
 		self::$log = new FullCulqi_Logs( $order->get_id() );
 
-		// If the user is logged
-		if ( self::customer( $order ) ) {
+		// Process Customer
+		self::customer( $order );
 
-			$culqiCustomerID = $order->get_meta( '_culqi_customer_id' );
-			$postCustomerID  = $order->get_meta( '_post_customer_id' );
+		// If the user is logged
+		if ( Customers::getInstance()->haveCurrentItemIDs() ) {
+
+			$culqiCustomerID = Customers::getInstance()->getCurrentItemID( 'culqi_customer_id' );
+			$postCustomerID  = Customers::getInstance()->getCurrentItemID( 'post_customer_id' );
 
 			// Create Card
 			if ( ! empty( $culqiCustomerID ) && ! \fullculqi_is_token_yape( $token ) ) {
@@ -171,9 +163,9 @@ class FullCulqi_WC_Process {
 
 					$token = \sanitize_text_field( $postData['card_id'] );
 
-					$culqi_card = Cards::getInstance()->get( $token );
+					$card = Cards::getInstance()->get( $token );
 
-					\do_action( 'fullculqi/wc/charge/card', $culqi_card, $order );
+					\do_action( 'fullculqi/wc/charge/card', $card->data, $order );
 				
 				} else {
 
@@ -182,7 +174,8 @@ class FullCulqi_WC_Process {
 						'token_id'    => $token,
 						'validate'    => true,
 						'metadata'    => [
-							'customer_id' => $postCustomerID,
+							'culqi_customer_id' => $culqiCustomerID,
+							'post_customer_id'  => $postCustomerID,
 						]
 					];
 
@@ -198,7 +191,7 @@ class FullCulqi_WC_Process {
 
 					$card = Cards::getInstance()->create( $args );
 
-					\do_action( 'fullculqi/wc/charge/card', $card, $order );
+					\do_action( 'fullculqi/wc/charge/card', $card->data, $order );
 
 					if ( ! $card->success ) {
 						$error = \sprintf(
@@ -213,7 +206,6 @@ class FullCulqi_WC_Process {
 
 					// If it needs 3Ds
 					if ( $card->data->needs3Ds ) {
-						//\update_post_meta( $order->get_id(), '_culqi_needs3Ds', true );
 						$order->update_meta_data( '_culqi_needs3Ds', true );
 						$order->save_meta_data();
 						
@@ -226,6 +218,7 @@ class FullCulqi_WC_Process {
 
 					// Remove needs3Ds
 					$order->delete_meta_data( '_culqi_needs3Ds' );
+					$order->save_meta_data();
 
 					// Set CardID
 					$token = $card->data->culqiCardID;
@@ -233,7 +226,7 @@ class FullCulqi_WC_Process {
 			}
 		}
 
-		if( ! isset( $token ) ) {
+		if ( ! isset( $token ) ) {
 			return false;
 		}
 
@@ -300,10 +293,11 @@ class FullCulqi_WC_Process {
 
 			// Metadata Order
 			$metadata = [
-				'order_id'      => $order->get_id(),
-				'order_number'  => $order->get_order_number(),
-				'order_key'     => $order->get_order_key(),
-				'post_customer' => $postCustomerID ?? 0,
+				'wc_order_id'       => $order->get_id(),
+				'wc_order_number'   => $order->get_order_number(),
+				'wc_order_key'      => $order->get_order_key(),
+				'post_customer_id'  => $postCustomerID ?? null,
+				'culqi_customer_id' => $culqiCustomerID ?? null,
 			];
 
 			$args = [
@@ -362,8 +356,8 @@ class FullCulqi_WC_Process {
 			$postChargeID  = $charge->data->postChargeID;
 
 			// Meta value
-			//\update_post_meta( $order->get_id(), '_culqi_charge_id', $culqiChargeID );
 			$order->update_meta_data( '_culqi_charge_id', $culqiChargeID );
+			$order->update_meta_data( '_post_charge_id', $postChargeID );
 
 			// Log
 			$notice = \sprintf(
@@ -381,13 +375,8 @@ class FullCulqi_WC_Process {
 			);
 			self::$log->set_notice( $notice );
 
-			// Update PostID in WC-Order
-			//\update_post_meta( $order->get_id(), '_post_charge_id', $postChargeID );
-			$order->update_meta_data( '_post_charge_id', $postChargeID );
-
 			// Update OrderID in CulqiCharges
 			\update_post_meta( $postChargeID, 'culqi_wc_order_id', $order->get_id() );
-
 
 			$status = \apply_filters( 'fullculqi/process/change_status', [
 				'name'	=> $method['status_success'],
@@ -421,29 +410,34 @@ class FullCulqi_WC_Process {
 		}
 
 		// If exist the order email
-		if ( empty( $customer ) ) {
+		if ( ! $customer->success ) {
 			$customer = Customers::getInstance()->getByEmail( $order->get_billing_email() );
 		}
 		
 
-		if ( ! empty( $customer ) ) {
+		if ( $customer->success ) {
 
 			// Log Notice
 			$notice = sprintf(
-				esc_html__( 'Culqi Customer: %s', 'fullculqi' ), $customer->culqiID
+				esc_html__( 'Culqi Customer: %s', 'fullculqi' ), $customer->data->culqiCustomerID
 			);
 			self::$log->set_notice( $notice );
 
 			// Log
 			$notice = sprintf(
-				esc_html__( 'Post Customer: %s', 'fullculqi' ), $customer->postID
+				esc_html__( 'Post Customer: %s', 'fullculqi' ), $customer->data->postCustomerID
 			);
 			self::$log->set_notice( $notice );
 
 			// Update meta post in wc order
-			$order->update_meta_data( '_culqi_customer_id', $customer->culqiID );
-			$order->update_meta_data( '_post_customer_id', $customer->postID );
+			$order->update_meta_data( '_culqi_customer_id', $customer->data->culqiCustomerID );
+			$order->update_meta_data( '_post_customer_id', $customer->data->postCustomerID );
 			$order->save_meta_data();
+
+			Customers::getInstance()->setCurrentItemIDs( [
+				'culqi_customer_id' => $customer->data->culqiCustomerID,
+				'post_customer_id'  => $customer->data->postCustomerID,
+			] );
 
 			return true;
 		}
@@ -528,10 +522,13 @@ class FullCulqi_WC_Process {
 		self::$log->set_notice( $notice );
 
 		// Update meta post in wc order
-		//update_post_meta( $order->get_id(), '_post_customer_id', $postCustomerID );
 		$order->update_meta_data( '_post_customer_id', $postCustomerID );
-
 		$order->save_meta_data();
+
+		Customers::getInstance()->setCurrentItemIDs( [
+			'culqi_customer_id' => $culqiCustomerID,
+			'post_customer_id'  => $postCustomerID,
+		] );
 
 		return true;
 	}

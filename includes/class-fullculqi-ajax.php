@@ -51,8 +51,8 @@ class FullCulqi_Ajax {
 			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
 		}
 
-		$record  = isset( $_POST['record'] ) ? \intval( $_POST['record'] ) : 100;
-		$afterID = isset( $_POST['after_id'] ) ? \esc_html( $_POST['after_id'] ) : '';
+		$record  = \intval( $_POST['record'] ?? 50 );
+		$afterID = \esc_html( $_POST['after_id'] ?? '' );
 
 		$charges = Charges::getInstance()->sync( $record, $afterID );
 
@@ -77,8 +77,8 @@ class FullCulqi_Ajax {
 			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
 		}
 
-		$record  = isset( $_POST['record'] ) ? \intval( $_POST['record'] ) : 100;
-		$afterID = isset( $_POST['after_id'] ) ? \esc_html( $_POST['after_id'] ) : '';
+		$record  = \intval( $_POST['record'] ?? 50 );
+		$afterID = \esc_html( $_POST['after_id'] ?? '' );
 
 		$orders = Orders::getInstance()->sync( $record, $afterID );
 
@@ -100,11 +100,12 @@ class FullCulqi_Ajax {
 		\check_ajax_referer( 'fullculqi-wpnonce', 'wpnonce' );
 
 		// Check the permissions
-		if( ! \current_user_can( 'manage_options' ) )
+		if( ! \current_user_can( 'manage_options' ) ) {
 			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
+		}
 
-		$record  = isset( $_POST['record'] ) ? \intval( $_POST['record'] ) : 100;
-		$afterID = isset( $_POST['after_id'] ) ? \esc_html( $_POST['after_id'] ) : '';
+		$record  = \intval( $_POST['record'] ?? 50 );
+		$afterID = \esc_html( $_POST['after_id'] ?? '' );
 
 		$customers = Customers::getInstance()->sync( $record, $afterID );
 
@@ -196,51 +197,69 @@ class FullCulqi_Ajax {
 
 		// Check the permissions
 		if ( ! \current_user_can( 'manage_options' ) ) {
-			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
+			\wp_send_json_error([
+				'message' => \esc_html__( 'You do not have permission.', 'fullculqi' )
+			]);
 		}
 
 		// Check if the post exists
-		if ( ! isset( $_POST['post_id'] ) || empty( $_POST['post_id'] ) ) {
-			\wp_send_json_error();
+		if ( empty( $_POST['post_id'] ) ) {
+			\wp_send_json_error([
+				'message' => \esc_html__( 'There is no post ID', 'fullculqi' )
+			]);
 		}
 
 		// Charge Post ID
 		$postChargeID = \absint( $_POST['post_id'] );
 
 
-		$refund = new \stdClass();
+		// If external process. For example: WooCommerce
+		if ( \has_filter( 'fullculqi/ajax/refund/is_external', false ) ) {
 
-		// 3rd-party
-		$refund = \apply_filters( 'fullculqi/ajax/refund/process', $refund, $postChargeID );
+			$refundStatus = apply_filters( 'fullculqi/ajax/refund/process_external', $postChargeID );
 
-		if ( empty( $refund ) ) {
+			if ( ! $refundStatus ) {
+				\wp_send_json_error([
+					'message' => \esc_html__( 'Process external failed.', 'fullculqi' )
+				]);
+			}
 
-			// Meta Basic from Charges
-			$chargeBasic = \get_post_meta( $postChargeID, 'culqi_basic', true );
-			$amount      = \floatval( $chargeBasic['culqi_amount'] ) - floatval( $chargeBasic['culqi_amount_refunded'] );
-
-			// Culqi Charge ID
-			$culqiChargeID = \get_post_meta( $postChargeID, 'culqi_id', true );
-
-			$args = [
-				'amount'	=> \round( $amount*100, 0 ),
-				'charge_id'	=> $culqiChargeID,
-				'reason'	=> 'solicitud_comprador',
-				'metadata'	=> [
-					'post_id'	=> $postChargeID,
-				],
-			];
-
-			$refund = Refunds::getInstance()->create( $postChargeID, $args );
-		}
-
-		\do_action( 'fullculqi/ajax/refund/create', $refund );
-
-		if ( $refund && $refund->success ) {
 			\wp_send_json_success();
 		}
 
-		\wp_send_json_error( $refund->data->message ?? '' );
+		// Meta Basic from Charges
+		$chargeBasic = \get_post_meta( $postChargeID, 'culqi_basic', true );
+		$refundAmount = $chargeBasic['culqi_current_amount'] ?? 0;
+
+		if ( $refundAmount == 0 ) {
+			\wp_send_json_error([
+				'message' => \esc_html__( 'The amount to be refunded must be greater than 0.', 'fullculqi' )
+			]);
+		}
+
+		// Culqi Charge ID
+		$culqiChargeID = \get_post_meta( $postChargeID, 'culqi_id', true );
+
+		$args = \apply_filters( 'fullculqi/ajax/refund/args', [
+			'amount'	=> \round( $refundAmount*100, 0 ),
+			'charge_id'	=> $culqiChargeID,
+			'reason'	=> 'solicitud_comprador',
+			'metadata'	=> [
+				'post_charge_id' => $postChargeID,
+			],
+		], $postChargeID );
+
+		$refund = Refunds::getInstance()->create( $args );
+
+		if ( ! $refund->success ) {
+			\wp_send_json_error( [ 'message' => $refund->data->message ] );
+		}
+
+		$charge = Charges::getInstance()->processRefund( $postChargeID, $refund->data );
+
+		\do_action( 'fullculqi/ajax/refund/create', $refund->data, $postChargeID );
+
+		\wp_send_json_success();
 	}
 }
 

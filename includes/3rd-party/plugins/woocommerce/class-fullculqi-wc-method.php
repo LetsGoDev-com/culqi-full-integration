@@ -1,5 +1,6 @@
 <?php
 
+use Fullculqi\Syncs\Charges;
 use Fullculqi\Syncs\Refunds;
 use Fullculqi\Syncs\Orders;
 
@@ -452,11 +453,11 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 		// Logs
 		$log = new FullCulqi_Logs( $order->get_id() );
 
-		$culqiChargesID = $order->get_meta( '_culqi_charge_id' );
-		$postChargeID   = $order->get_meta( '_post_charge_id' );
+		$culqiChargeID = $order->get_meta( '_culqi_charge_id' );
+		$postChargeID  = $order->get_meta( '_post_charge_id' );
 
 
-		if ( empty( $culqiChargesID ) ) {
+		if ( empty( $culqiChargeID ) ) {
 			$message = esc_html__( 'The refund cannot be made from FullCulqi', 'fullculqi' );
 			return new WP_Error( 'error', $message );
 		}
@@ -466,8 +467,11 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 			'charge_id'	=> $culqiChargesID,
 			'reason'	=> 'solicitud_comprador',
 			'metadata'	=> [
-				'post_id'	=> $postChargeID ?: 0,
-				'order_id'	=> $order->get_id(),
+				'post_charge_id'  => $postChargeID,
+				'culqi_charge_id' => $culqiChargeID,
+				'wc_order_id'     => $order->get_id(),
+				'wc_order_number' => $order->get_order_number(),
+				'wc_order_key'    => $order->get_order_key(),
 			],
 		];
 		
@@ -489,6 +493,9 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 		);
 		$order->add_order_note( $notice );
 		$log->set_notice( $notice );
+
+
+		$charge = Charges::getInstance()->processRefund( $postChargeID, $refund->data );
 
 		return true;
 	}

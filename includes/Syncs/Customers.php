@@ -30,7 +30,7 @@ class Customers extends Client {
 	 * @param  integer $wpuser_id
 	 * @return bool
 	 */
-	public function get( int $WPUserID = 0 ): ?\stdClass {
+	public function get( int $WPUserID ): ?\stdClass {
 
 		// Check in the WP_USERS
 		$culqiCustomerID = \get_user_meta( $WPUserID, '_culqi_customer_id', true );
@@ -38,29 +38,41 @@ class Customers extends Client {
 
 		if ( ! empty( $culqiCustomerID ) && ! empty( $postCustomerID ) ) {
 			return (object)[
-				'wpuserID' => $WPUserID,
-				'culqiID'  => $culqiCustomerID,
-				'postID'   => $postCustomerID
+				'success' => true,
+				'data'    => (object)[
+					'wpuserID'        => $WPUserID,
+					'culqiCustomerID' => $culqiCustomerID,
+					'postCustomerID'  => $postCustomerID
+				],
 			];
 		}
 
 		// Check in the Customer CPT
-		$postID = \fullculqi_post_from_meta( 'culqi_wp_user_id', \absint( $WPUserID ) );
+		$postCustomerID = \fullculqi_post_from_meta( 'culqi_wp_user_id', \absint( $WPUserID ) );
 
-		if ( empty( $postID ) ) {
-			return null;
+		if ( empty( $postCustomerID ) ) {
+			return (object)[
+				'success' => false,
+				'data'    => (object)[ 'message' => \esc_html__( 'There is no Post Customer ID', 'fullculqi' ) ],
+			];
 		}
 
-		$culqiCustomerID = \get_post_meta( $postID, 'culqi_id', true );
+		$culqiCustomerID = \get_post_meta( $postCustomerID, 'culqi_id', true );
 
 		if ( empty( $culqiCustomerID ) ) {
-			return null;
+			return (object)[
+				'success' => false,
+				'data'    => (object)[ 'message' => \esc_html__( 'There is no Culqi Customer ID', 'fullculqi' ) ],
+			];
 		}
 
 		return (object)[
-			'wpuserID' => $WPUserID,
-			'culqiID'  => $culqiCustomerID,
-			'postID'   => $postID
+			'success' => true,
+			'data'    => (object) [
+				'wpuserID'        => $WPUserID,
+				'culqiCustomerID' => $culqiCustomerID,
+				'postCustomerID'  => $postCustomerID
+			],
 		];
 	}
 
@@ -75,36 +87,40 @@ class Customers extends Client {
 			'post_type'	  => $this->postType,
 			'post_status' => 'publish',
 			'meta_query'  => [[
-					'key'     => 'culqi_email',
-					'value'	  => $email,
-					'compare' => '=',
-				]
-			]
+				'key'     => 'culqi_email',
+				'value'	  => $email,
+				'compare' => '=',
+			]]
 		];
 
 		$posts = \get_posts( $args );
+		$post  = $posts[0] ?? null;
 
-		if ( $posts ) {
-			foreach ( $posts as $post ) {
-				return (object)[
-					'wpuserID' => \get_post_meta( $post->ID, 'culqi_wp_user_id', true ),
-					'culqiID'  => \get_post_meta( $post->ID, 'culqi_id', true ),
-					'postID'   => $post->ID,
-				];
-			}
+		if ( ! $post instanceof WP_Post ) {
+			return (object)[
+				'success' => false,
+				'data'    => (object)[ 'message' => \esc_html__( 'There is no Culqi Customer by Email', 'fullculqi' ) ],
+			];
 		}
 
-		return null;
+		return (object)[
+			'success' => true,
+			'data'    => (object) [
+				'wpuserID'        => \get_post_meta( $post->ID, 'culqi_wp_user_id', true ),
+				'culqiCustomerID' => \get_post_meta( $post->ID, 'culqi_id', true ),
+				'postCustomerID'  => $post->ID,
+			]
+		];
 	}
 
 	
 	/**
 	 * Create Customer
-	 * @param  integer $wpuser_id
-	 * @param  array   $post_data
+	 * @param  integer $WPUserID
+	 * @param  array   $args
 	 * @return mixed
 	 */
-	public function create( int $WPUserID = 0, array $args = [] ): \stdClass {
+	public function create( int $WPUserID, array $args ): \stdClass {
 
 		$args     = \apply_filters( \sprintf( 'fullculqi/%s/create/args', $this->postType ), $args );
 		$customer = $this->requestPost( $args );
@@ -112,7 +128,6 @@ class Customers extends Client {
 		if ( ! $customer->success ) {
 			return $customer;
 		}
-
 
 		// Create Order Post
 		$postID = $this->createWPPost( $customer->data->body );
@@ -122,7 +137,9 @@ class Customers extends Client {
 		\update_user_meta( $WPUserID, '_culqi_customer_id', $customer->data->body->id );
 		\update_user_meta( $WPUserID, '_post_customer_id', $postID );
 
-		\do_action( \sprintf( 'fullculqi/%s/create', $this->postType ), $postID, $customer );
+		\do_action(
+			\sprintf( 'fullculqi/%s/create', $this->postType ), $postID, $customer->data->body
+		);
 
 		return (object) \apply_filters( \sprintf( 'fullculqi/%s/create/success', $this->postType ), [
 			'success' => true,
@@ -140,7 +157,7 @@ class Customers extends Client {
 	 * @param  objt $customer
 	 * @return integer
 	 */
-	public function createWPPost( \stdClass $customer, int $postID = 0 ): int {
+	public function createWPPost( \stdClass $customer, ?int $postID = null ): int {
 
 		if ( empty( $postID ) ) {
 

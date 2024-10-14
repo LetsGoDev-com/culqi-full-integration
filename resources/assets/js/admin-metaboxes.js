@@ -108,7 +108,7 @@
 					
 					if( response.success ) {
 
-						if( response.data.after_id == null ) {
+						if( response.data.after_id == null || response.data.remaining_items == null ) {
 							$('#' + fullculqi_vars.sync_notify).html( fullculqi_vars.img_success + ' ' + fullculqi_vars.sync_success );
 							location.reload();
 						} else {

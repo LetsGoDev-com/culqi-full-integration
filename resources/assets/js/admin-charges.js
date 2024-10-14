@@ -52,8 +52,9 @@
 			$( '#culqi_refunds' ).on( 'click', function(e) {
 				e.preventDefault();
 
-				if( ! confirm( fullculqi_charges_vars.refund_confirm ) )
+				if ( ! confirm( fullculqi_charges_vars.refund_confirm ) ) {
 					return;
+				}
 
 				const post_id = $(this).data('post');
 
@@ -88,8 +89,7 @@
 						location.reload();
 					
 					} else {
-						
-						$('#culqi_refunds_notify' ).html( fullculqi_charges_vars.img_failure + ' ' + response.data );
+						$('#culqi_refunds_notify' ).html( fullculqi_charges_vars.img_failure + ' ' + response.data.message );
 					}			
 				},
 				error: function(jqXHR, textStatus, errorThrown) {

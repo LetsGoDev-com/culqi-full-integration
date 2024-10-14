@@ -27,9 +27,9 @@ Buscar "Culqi", instalar y activar
 ## Instalación desde Github ##
 
 **1. Clonar Repositorio**
-```git clone git@github.com:gonzalesc/wp-culqi-integration.git```
+```git clone git@github.com:LetsGoDev-com/culqi-full-integration.git```
 
-**2. Descargar Biblioteca Culqi**
+**2. Descargar dependencias**
 ```composer update```
 
 

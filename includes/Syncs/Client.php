@@ -28,6 +28,13 @@ abstract class Client {
 
 
 	/**
+	 * Current Item IDs
+	 * @var array
+	 */
+	protected array $currentItemIDs;
+
+
+	/**
 	 * Get item from Culqi when it creates a post type
 	 * @var boolean
 	 */
@@ -367,12 +374,12 @@ abstract class Client {
 
 	/**
 	 * Sync from Culqi
-	 * @param  integer $records
+	 * @param  integer $record
 	 * @return mixed
 	 */
-	public function sync( int $records = 100, string $afterID = '' ): \stdClass {
+	public function sync( int $record = 50, string $afterID = '' ): \stdClass {
 
-		$params = [ 'limit' => $records ];
+		$params = [ 'limit' => $record ];
 
 		if( ! empty( $afterID ) ) {
 			$params[ 'after' ] = $afterID;
@@ -459,11 +466,73 @@ abstract class Client {
 		return (object)[
 			'success'	=> true,
 			'data'		=> (object)[
-				'after_id'	=> $items->data->paging->cursors->after,
+				'after_id'	      => $items->data->paging->cursors->after ?? null,
+				'remaining_items' => $items->data->paging->remaining_items ?? null,
 			]
 		];
 	}
 
+	/**
+	 * Get By Item ID
+	 * @param  string $itemID
+	 * @return \stdClass
+	 */
+	public function syncByItem( string $itemID, ?int $itemPostID = null ): \stdClass {
+		$itemSingle = $this->requestGet( $itemID );
+
+		if ( ! $itemSingle->success ) {
+			return $itemSingle;
+		}
+
+		$postID = $this->createWPPost( $itemSingle->data->body, $itemPostID );
+
+		\do_action(
+			\sprintf( 'fullculqi/%s/get', $this->postType ), $itemSingle->data->body, $itemPostID
+		);
+
+		return (object)[
+			'success'	=> true,
+			'data'		=> (object)[
+				'post_id0'	=> $postID,
+			]
+		];
+	}
+
+
+	/**
+	 * Set Current Item IDs
+	 * @param array $currentItemIDs
+	 */
+	public function setCurrentItemIDs( array $currentItemIDs ): void {
+		$this->currentItemIDs = $currentItemIDs;
+	}
+
+
+	/**
+	 * Get Current Item IDs
+	 * @return array
+	 */
+	public function getCurrentItemIDs(): array {
+		return $this->currentItemIDs ?: [];
+	}
+
+	/**
+	 * Get Current Item ID by Key
+	 * @param  string $key
+	 * @return mixed
+	 */
+	public function getCurrentItemID( string $key ): mixed {
+		return $this->currentItemIDs[ $key ] ?? '';
+	}
+
+
+	/**
+	 * Check if it have current items
+	 * @return boolean
+	 */
+	public function haveCurrentItemIDs(): bool {
+		return ! empty( $this->currentItemIDs );
+	}
 
 
 	/**

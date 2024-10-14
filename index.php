@@ -2,10 +2,10 @@
 /**
  * @link     https://www.letsgodev.com/
  * @since    1.0.0
- * @package  wc-culqi-integration
+ * @package  culqi-full-integration
  * 
  * Plugin Name:          Culqi Full Integration 
- * Plugin URI:           https://wordpress.org/plugins/wp-culqi-integration
+ * Plugin URI:           https://wordpress.org/plugins/culqi-full-integration
  * Description:          Culqi is a Payment method to Peru.
  * Version:              3.0.0
  * Author:               Lets Go Dev

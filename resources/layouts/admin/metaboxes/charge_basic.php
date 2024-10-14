@@ -46,6 +46,10 @@
 					<?php echo $amount; ?>
 				</li>
 				<li>
+					<b><?php esc_html_e( 'Current Amount', 'fullculqi' ); ?> : </b>
+					<?php echo $current_amount; ?>
+				</li>
+				<li>
 					<b><?php esc_html_e( 'Refund', 'fullculqi' ); ?> : </b>
 					<?php echo $refunded; ?>
 				</li>
@@ -58,7 +62,7 @@
 						$status_class, $statuses[$status]
 					);
 
-					if( $status == 'captured' || $status == 'authorized' ) {
+					if ( $can_refund ) {
 						echo '&nbsp';
 
 						printf(
@@ -74,7 +78,7 @@
 			?>
 			<?php do_action( 'fullculqi/layout_basic/status' ); ?>
 		</div>
-		<div class="culqi_data_column">
+		<div class="metabox_column">
 			<h3 class="metabox_h3">
 				<?php esc_html_e( 'Customer', 'fullculqi' ); ?>
 			</h3>

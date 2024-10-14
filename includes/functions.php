@@ -56,14 +56,17 @@ function fullculqi_currencies( $type = 'name' ) {
  * @param  string  $currency
  * @return string
  */
-function fullculqi_format_price( $amount = 0, $currency = 'PEN' ) {
+function fullculqi_format_price( float $amount, string $currency = 'PEN' ): string {
 
-	if( empty( $currency ) )
+	if ( empty( $currency ) ) {
 		return floatval( $amount );
+	}
 
 	$symbols = fullculqi_currencies( 'symbol' );
 
-	$output = $symbols[ $currency ] . ' ' . number_format( str_replace(',', '', $amount), 2 );
+	$output = \sprintf(
+		'%s %s', $symbols[ $currency ], number_format( str_replace(',', '', $amount), 2 )
+	);
 
 	return apply_filters('fullculqi/format_price', $output, $amount, $currency );
 }
@@ -232,15 +235,16 @@ function fullculqi_class_from_status( $status = '', $type = 'charges' ) {
  * @param  string $unixTime
  * @return string
  */
-function fullculqi_convertToDate( string $unixTime = '' ): string {
+function fullculqi_convertToDate( ?string $unixTime ): string {
 	if( empty( $unixTime ) ) {
-		return $unixTime;
+		return '';
 	}
 
 	$date = intval( $unixTime/1000 );
 
-	if( date( 'Y', $date ) > 2000 )
+	if ( date( 'Y', $date ) > 2000 ) {
 		return date( 'Y-m-d H:i:s', $date );
+	}
 
 	$date = intval( $unixTime );
 

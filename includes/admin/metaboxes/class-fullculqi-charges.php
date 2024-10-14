@@ -128,9 +128,9 @@ class FullCulqi_Metaboxes_Charges extends FullCulqi_Metaboxes {
 				break;
 
 			//case 'culqi_currency'	: $value = $basic['culqi_currency']; break;
-			case 'culqi_amount'		:
+			case 'culqi_amount' :
 				$value = fullculqi_format_price(
-					$basic['culqi_amount'], $basic['culqi_currency']
+					$basic['culqi_current_amount'] ?? 0.00, $basic['culqi_currency']
 				); 
 				break;
 
@@ -238,28 +238,32 @@ class FullCulqi_Metaboxes_Charges extends FullCulqi_Metaboxes {
 		$capture = get_post_meta( $post->ID, 'culqi_capture', true );
 		$capture_date = get_post_meta( $post->ID, 'culqi_capture_date', true );
 
+		$canRefund = ! empty( $basic['culqi_current_amount'] ) && $basic['culqi_current_amount'] > 0 && \in_array( $status, [ 'captured', 'authorized' ] );
+
 
 		$args = apply_filters( 'fullculqi/charges/metabox_basic/args', [
-			'post_id'		=> $post->ID,
-			'id'			=> get_post_meta( $post->ID, 'culqi_id', true ),
-			'ip'			=> get_post_meta( $post->ID, 'culqi_ip', true ),
-			'type'			=> get_post_meta( $post->ID, 'culqi_charge_type', true ),
-			'order_id'		=> get_post_meta( $post->ID, 'culqi_order_id', true ),
-			'creation_date'	=> get_post_meta( $post->ID, 'culqi_creation_date', true ),
-			'currency'		=> $basic['culqi_currency'],
-			'amount'		=> $basic['culqi_amount'],
-			'refunded'		=> $basic['culqi_amount_refunded'],
-			'statuses'		=> fullculqi_charges_statuses(),
-			'status'		=> $status,
-			'status_class'	=> $status_class,
-			'capture'		=> $capture,
-			'capture_date'	=> $capture_date,
-			'email'			=> $customer_email,
-			'first_name'	=> $customer['culqi_first_name'],
-			'last_name'		=> $customer['culqi_last_name'],
-			'city'			=> $customer['culqi_city'],
-			'country'		=> $customer['culqi_country'],
-			'phone'			=> $customer['culqi_phone'],
+			'post_id'		 => $post->ID,
+			'id'			 => get_post_meta( $post->ID, 'culqi_id', true ),
+			'ip'			 => get_post_meta( $post->ID, 'culqi_ip', true ),
+			'type'			 => get_post_meta( $post->ID, 'culqi_charge_type', true ),
+			'order_id'		 => get_post_meta( $post->ID, 'culqi_order_id', true ),
+			'creation_date'	 => get_post_meta( $post->ID, 'culqi_creation_date', true ),
+			'currency'		 => $basic['culqi_currency'] ?? 'PEN',
+			'amount'		 => $basic['culqi_amount'] ?? 0.00,
+			'current_amount' => $basic['culqi_current_amount'] ?? 0.00,
+			'refunded'		 => $basic['culqi_amount_refunded'] ?? 0.00,
+			'statuses'		 => fullculqi_charges_statuses(),
+			'can_refund'     => $canRefund,
+			'status'		 => $status,
+			'status_class'	 => $status_class,
+			'capture'		 => $capture,
+			'capture_date'	 => $capture_date,
+			'email'			 => $customer_email,
+			'first_name'	 => $customer['culqi_first_name'],
+			'last_name'		 => $customer['culqi_last_name'],
+			'city'			 => $customer['culqi_city'],
+			'country'		 => $customer['culqi_country'],
+			'phone'			 => $customer['culqi_phone'],
 		], $post );
 
 		fullculqi_get_template( 'resources/layouts/admin/metaboxes/charge_basic.php', $args );

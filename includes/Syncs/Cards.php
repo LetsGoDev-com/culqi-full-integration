@@ -24,7 +24,6 @@ class Cards extends Client {
 	 */
 	public function create( array $args ): \stdClass {
 
-
 		$args = \apply_filters( 'fullculqi/culqi_cards/create/args', $args );
 		$card = $this->requestPost( $args );
 
@@ -40,14 +39,17 @@ class Cards extends Client {
 			];
 		}
 
-		\do_action( \sprintf( 'fullculqi/%s/create', $this->postType ), $card );
+		\do_action( 'fullculqi/culqi_cards/create', $card->data->body );
 
-		return (object) \apply_filters( \sprintf( 'fullculqi/%s/create/success', $this->postType ), [
+		return (object) \apply_filters( \sprintf( 'fullculqi/culqi_cards/create/success', $this->postType ), [
 			'success' => true,
 			'data'    => (object) [
-				'culqiCardID'   => $card->data->body->id,
-				'culqiCardData' => $card->data->body,
-				'needs3Ds'      => false,
+				'culqiCardID'    => $card->data->body->id,
+				'culqiCardLast4' => $card->data->body->source->last_four ?? '',
+				'culqiCardBrand' => $card->data->body->source->iin->card_brand ?? '',
+				'culqiCardBin'   => $card->data->body->source->iin->bin ?? '',
+				'culqiCardType'  => $card->data->body->source->iin->card_type ?? '',
+				'needs3Ds'       => false,
 			]
 		] );
 	}
@@ -62,7 +64,7 @@ class Cards extends Client {
 		global $culqi;
 
 		$culqiCardID = \apply_filters(
-			\sprintf( 'fullculqi/%s/get/id', $this->postType ), $culqiCardID
+			'fullculqi/culqi_cards/get/id', $culqiCardID
 		);
 
 		$card = $this->requestGet( $culqiCardID );
@@ -71,13 +73,16 @@ class Cards extends Client {
 			return $card;
 		}
 
-		\do_action( \sprintf( 'fullculqi/%s/get/after', $this->postType ) , $card );
+		\do_action( 'fullculqi/culqi_cards/get/after', $card->data->body );
 
-		return (object) \apply_filters( \sprintf( 'fullculqi/%s/get/success', $this->postType ), [
+		return (object) \apply_filters( 'fullculqi/culqi_cards/get/success', [
 			'success' => true,
 			'data'    => (object)[
-				'culqiCardID'   => $card->id,
-				'culqiCardData' => $card
+				'culqiCardID'    => $card->data->body->id,
+				'culqiCardLast4' => $card->data->body->source->last_four ?? '',
+				'culqiCardBrand' => $card->data->body->source->iin->card_brand ?? '',
+				'culqiCardType'  => $card->data->body->source->iin->card_type ?? '',
+				'culqiCardBin'   => $card->data->body->source->iin->bin ?? '',
 			]
 		] );
 	}
