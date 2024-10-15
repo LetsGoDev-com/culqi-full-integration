@@ -50,28 +50,37 @@ class FullCulqi_Metaboxes_Orders extends FullCulqi_Metaboxes {
 		$value = '';
 
 		switch( $col ) {
-			case 'culqi_cip'		: $value = get_post_meta( $post_id, 'culqi_cip', true );
+			case 'culqi_cip' :
+				$value = get_post_meta( $post_id, 'culqi_cip', true );
 				break;
-			case 'culqi_creation'	:
-				$value = get_post_meta( $post_id, 'culqi_creation_date', true ); break;
-			case 'culqi_expiration'	: $value = $basic['culqi_expiration']; break;
-			case 'culqi_email'		:
 
-				if( ! empty( $customer['post_id'] ) ) {
+			case 'culqi_creation' :
+				$value = get_post_meta( $post_id, 'culqi_creation_date', true );
+				break;
+
+			case 'culqi_expiration'	:
+				$value = $basic['culqi_expiration'];
+				break;
+
+			case 'culqi_email' :
+
+				if ( ! empty( $customer['post_id'] ) ) {
 
 					$value = sprintf(
 						'<a target="_blank" href="%s">%s</a>',
 						get_edit_post_link( $customer['post_id'] ), $customer['culqi_email']
 					);
 
-				} else
+				} else {
 					$value = $customer['culqi_email'];
+				}
 
 				break;
-			case 'culqi_amount'		:
-				$value = fullculqi_format_price( $basic['culqi_amount'] ); break;
+			case 'culqi_amount' :
+				$value = fullculqi_format_price( $basic['culqi_amount'] );
+				break;
 			
-			case 'culqi_status'		:
+			case 'culqi_status' :
 				$statuses = fullculqi_multipayments_statuses();
 				$status = get_post_meta( $post_id, 'culqi_status', true );
 				$class = fullculqi_class_from_status( $status, 'orders' );
@@ -177,6 +186,10 @@ class FullCulqi_Metaboxes_Orders extends FullCulqi_Metaboxes {
 	}
 
 
+	/**
+	 * Layout code
+	 * @return [type] [description]
+	 */
 	public function metabox_code() {
 		global $post;
 

@@ -44,29 +44,12 @@ class FullCulqi_WC_Process {
 		// Log
 		self::$log = new FullCulqi_Logs( $order->get_id() );
 
-		// Culqi Customer ID
-		$metadata = [
-			'cip_code'    => $postData['cip_code'],
-			'wc_order_id' => $order->get_id(),
-			'wp_user_id'  => $order->get_customer_id() ?: 0,
-		];
-		
-		// Process Customer
-		self::customer( $order );
+		$notice = \sprintf(
+			\esc_html__( 'Culqi Multipayment ID: %s', 'fullculqi' ), $postData['id']
+		);
 
-		if ( Customers::getInstance()->haveCurrentItemIDs() ) {
+		self::$log->set_notice( $notice );
 
-			$culqiCustomerID = Customers::getInstance()->getCurrentItemID( 'culqi_customer_id' );
-			$postCustomerID  = Customers::getInstance()->getCurrentItemID( 'post_customer_id' );
-
-			if ( ! empty( $culqiCustomerID ) ) {
-				$metadata['culqi_customer_id'] = $culqiCustomerID;
-			}
-
-			if ( ! empty( $postCustomerID ) ) {
-				$metadata['post_customer_id'] = $postCustomerID;
-			}
-		}
 
 		$notice = \sprintf(
 			\esc_html__( 'Culqi Multipayment CIP: %s', 'fullculqi' ), $postData['cip_code']
@@ -83,11 +66,14 @@ class FullCulqi_WC_Process {
 			)
 		);
 
+		// Is order payment type
+		$order->update_meta_data( '_culqi_payment_type', 'order' );
+
 		// Update CIP CODE in WC Order
 		$order->update_meta_data( '_culqi_cip', $postData['cip_code'] );
 
 		// From Culqi
-		$culqiOrder = Orders::getInstance()->afterConfirm( $postData['id'], $metadata );
+		$culqiOrder = Orders::getInstance()->afterConfirm( $postData['id'] );
 
 		if ( ! $culqiOrder->success ) {
 
@@ -236,6 +222,9 @@ class FullCulqi_WC_Process {
 		
 		} else {
 
+			// Is order payment type
+			$order->update_meta_data( '_culqi_payment_type', 'charge' );
+
 			// Charges
 			$pnames = [];
 
@@ -293,11 +282,17 @@ class FullCulqi_WC_Process {
 
 			// Metadata Order
 			$metadata = [
-				'wc_order_id'       => $order->get_id(),
-				'wc_order_number'   => $order->get_order_number(),
-				'wc_order_key'      => $order->get_order_key(),
-				'post_customer_id'  => $postCustomerID ?? null,
-				'culqi_customer_id' => $culqiCustomerID ?? null,
+				'wc_order_id'        => $order->get_id(),
+				'wc_order_number'    => $order->get_order_number(),
+				'wc_order_key'       => $order->get_order_key(),
+				'wc_order_email'     => $order->get_billing_email(),
+				'wc_order_firstname' => $order->get_billing_first_name(),
+				'wc_order_lastname'  => $order->get_billing_last_name(),
+				'wc_order_country'   => $order->get_billing_country(),
+				'wc_order_city'      => $order->get_billing_city(),
+				'wc_order_phone'     => $order->get_billing_phone(),
+				'post_customer_id'   => $postCustomerID ?? null,
+				'culqi_customer_id'  => $culqiCustomerID ?? null,
 			];
 
 			$args = [
@@ -335,7 +330,6 @@ class FullCulqi_WC_Process {
 
 			// If it needs 3Ds
 			if ( $charge->data->needs3Ds ) {
-				//\update_post_meta( $order->get_id(), '_culqi_needs3Ds', true );
 
 				$order->update_meta_data( '_culqi_needs3Ds', true );
 				$order->save_meta_data();

@@ -1,6 +1,7 @@
 <?php
 
 use Fullculqi\Syncs\Charges;
+use Fullculqi\Syncs\Customers;
 use Fullculqi\Syncs\Refunds;
 use Fullculqi\Syncs\Orders;
 
@@ -110,16 +111,38 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 					$billing_last_name  = $order->get_billing_last_name();
 					$billing_phone      = $order->get_billing_phone();
 
-					if( ! empty( $billing_first_name ) ) {
+					if ( ! empty( $billing_first_name ) ) {
 						$client['first_name'] = $billing_first_name;
 					}
 
-					if( ! empty( $billing_last_name ) ) {
+					if ( ! empty( $billing_last_name ) ) {
 						$client['last_name'] = $billing_last_name;
 					}
 
-					if( ! empty( $billing_phone ) ) {
+					if ( ! empty( $billing_phone ) ) {
 						$client['phone_number'] = $billing_phone;
+					}
+
+					$metadata = [
+						'wc_order_id'        => $order->get_id(),
+						'wc_order_number'    => $order->get_order_number(),
+						'wc_order_key'       => $order->get_order_key(),
+						'wc_order_email'     => $order->get_billing_email(),
+						'wc_order_firstname' => $order->get_billing_first_name(),
+						'wc_order_lastname'  => $order->get_billing_last_name(),
+						'wc_order_country'   => $order->get_billing_country(),
+						'wc_order_city'      => $order->get_billing_city(),
+						'wc_order_phone'     => $order->get_billing_phone(),
+					];
+
+					// Customer
+					if ( \is_user_logged_in() ) {
+						$customer = Customers::getInstance()->get( get_current_user_id() );
+
+						if ( $customer->success ) {
+							$metadata['culqi_customer_id'] = $customer->data->culqiCustomerID;
+							$metadata['post_customer_id']  = $customer->data->postCustomerID;
+						}
 					}
 
 					$args = apply_filters( 'fullculqi/orders/create/args', [
@@ -130,17 +153,7 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 						'client_details'	=> $client,
 						'confirm'			=> false,
 						'expiration_date'	=> time() + ( $this->multi_duration * HOUR_IN_SECONDS ),
-						'metadata'			=> [
-							'order_id'			=> $order->get_id(),
-							'order_number'		=> $order->get_order_number(),
-							'order_key'			=> $order->get_order_key(),
-							'customer_email'	=> $order->get_billing_email(),
-							'customer_first'	=> $order->get_billing_first_name(),
-							'customer_last'		=> $order->get_billing_last_name(),
-							'customer_city'		=> $order->get_billing_city(),
-							'customer_country'	=> $order->get_billing_country(),
-							'customer_phone'	=> $order->get_billing_phone(),
-						],
+						'metadata'			=> $metadata,
 					], $order);
 
 					$culqiOrder = Orders::getInstance()->create( $args );

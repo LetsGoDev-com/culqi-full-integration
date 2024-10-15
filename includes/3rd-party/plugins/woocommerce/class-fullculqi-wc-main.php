@@ -22,13 +22,16 @@ class FullCulqi_WC {
 		add_action( 'fullculqi/api/wc-actions', [ $this, 'actions' ] );
 
 		// Webhook Update order
-		add_action( 'fullculqi/culqi_orders/update', [ $this, 'update_order' ] );
+		add_action( 'fullculqi/culqi_orders/update', [ $this, 'updateCulqiOrder' ], 10, 2 );
 
 		// Lets add module type to script
 		add_action( 'script_loader_tag', [ $this, 'addAttrToScript' ], 10, 3 );
 
 		// HPOST compatibility
 		add_action( 'before_woocommerce_init', [ $this, 'declareCompatibilty' ] );
+
+		// Order Details
+		add_action( 'woocommerce_after_order_details', [ $this, 'culqiOrderContent' ] );
 	}
 
 
@@ -100,7 +103,7 @@ class FullCulqi_WC {
 
 			if ( $order instanceof WC_Order ) {
 				wp_send_json_success( [
-					'needs3Ds' => metadata_exists( 'post', $order->get_id(), '_culqi_needs3Ds' )
+					'needs3Ds' => $order->meta_exists( '_culqi_needs3Ds' )
 				] );
 
 			} else {
@@ -119,16 +122,16 @@ class FullCulqi_WC {
 	 * @param  OBJECT $culqi_order
 	 * @return mixed
 	 */
-	public function update_order( \stdClass $culqiOrder ) {
+	public function updateCulqiOrder( \stdClass $culqiOrder, int $postOrderID ) {
 
-		if( ! isset( $culqiOrder->id ) ) {
+		if ( ! isset( $culqiOrder->id ) ) {
 			return;
 		}
 
-		$orderID = fullculqi_post_from_meta( '_culqi_order_id', $culqiOrder->id );
+		$orderID = get_post_meta( $postOrderID, 'culqi_wc_order_id', true );
 		$order   = new WC_Order( $orderID );
 
-		if( ! $order instanceof WC_Order ) {
+		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
 
@@ -232,6 +235,29 @@ class FullCulqi_WC {
 		}
 	}
 
+
+	/**
+	 * Checkout Thanks page
+	 * @param  WC_Order     $order
+	 * @return void
+	 */
+	public function culqiOrderContent( \WC_Order $order ) {
+		$postOrderID = $order->get_meta( '_post_order_id' );
+
+		if ( empty( $postOrderID ) ) {
+			return;
+		}
+
+		$args = [
+			'qr'	=> get_post_meta( $postOrderID, 'culqi_qr', true ),
+			'cip'	=> get_post_meta( $postOrderID, 'culqi_cip', true ),
+		];
+
+		wc_get_template(
+			'layouts/checkout-order.php',
+			$args, false, FULLCULQI_WC_DIR
+		);
+	}
 }
 
 new FullCulqi_WC();

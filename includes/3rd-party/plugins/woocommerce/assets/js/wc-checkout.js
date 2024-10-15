@@ -215,7 +215,7 @@
 
 				let data;
 
-				if( Culqi.order ) {
+				if ( Culqi.order ) {
 
 					data = {
 						action 		: 'order',
@@ -266,9 +266,9 @@
 
 					$( document.body ).trigger( 'fullculqi.checkout.success', [ post_data, response ] );
 					
-					if( response.success ) {
+					if ( response.success ) {
 
-						if( response.data.needs3Ds ) {
+						if ( response.data.needs3Ds ) {
 
 							Culqi.close();
 

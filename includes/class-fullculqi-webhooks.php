@@ -26,13 +26,15 @@ class FullCulqi_Webhooks {
 
 		$inputJSON	= file_get_contents('php://input');
 
-		if( empty( $inputJSON ) )
+		if( empty( $inputJSON ) ) {
 			return;
+		}
 
 		$input = json_decode( $inputJSON );
 
-		if( $input->object != 'event' )
+		if( $input->object != 'event' ) {
 			return;
+		}
 
 		$data = json_decode( $input->data );
 

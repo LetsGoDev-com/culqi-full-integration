@@ -15,17 +15,14 @@ class FullCulqi_WC_Admin {
 		add_action( 'add_meta_boxes', [ $this, 'metaboxes'], 10, 1 );
 
 		// Metaboxes Charges columns
-		add_filter( 'fullculqi/charges/column_name', [ $this, 'column_name' ], 10, 1 );
-		add_filter( 'fullculqi/charges/column_value', [ $this, 'column_value' ], 10, 3 );
-		add_filter( 'fullculqi/orders/column_name', [ $this, 'column_name' ], 10, 1 );
-		add_filter( 'fullculqi/orders/column_value', [ $this, 'column_value' ], 10, 3 );
+		add_filter( 'fullculqi/charges/column_name', [ $this, 'columnName' ] );
+		add_filter( 'fullculqi/charges/column_value', [ $this, 'columnValue' ], 10, 3 );
+		add_filter( 'fullculqi/orders/column_name', [ $this, 'columnName' ] );
+		add_filter( 'fullculqi/orders/column_value', [ $this, 'columnValue' ], 10, 3 );
 
 		// Metaboxes Charges Edit
-		add_action(  'fullculqi/charges/basic/print_data', [ $this, 'basic_print_order' ] );
-		add_action(  'fullculqi/orders/basic/print_data', [ $this, 'basic_print_order' ] );
-
-		// Create WPPost
-		add_action( 'fullculqi/culqi_charges/sync/loop', [ $this, 'link_to_wc_orders' ], 10, 2 );
+		add_action(  'fullculqi/charges/basic/print_data', [ $this, 'basicPrintWCOrder' ] );
+		add_action(  'fullculqi/orders/basic/print_data', [ $this, 'basicPrintWCOrder' ] );
 
 		// Ajax Refund
 		add_filter( 'fullculqi/ajax/refund/is_external', '__return_true' );
@@ -46,10 +43,19 @@ class FullCulqi_WC_Admin {
 		add_meta_box(
 			'fullculqi_payment_log',
 			esc_html__( 'FullCulqi Logs', 'fullculqi' ),
-			[ $this, 'metabox_log' ],
+			[ $this, 'metaboxLog' ],
 			$orderScreen,
 			'normal',
 			'core'
+		);
+
+		add_meta_box(
+			'fullculqi_payment_resume',
+			esc_html__( 'FullCulqi Resume', 'fullculqi' ),
+			[ $this, 'metaboxResume' ],
+			$orderScreen,
+			'side',
+			'high'
 		);
 	}
 
@@ -59,7 +65,7 @@ class FullCulqi_WC_Admin {
 	 * @param  WP_POST $post
 	 * @return mixed
 	 */
-	public function metabox_log( $queriedObject ) {
+	public function metaboxLog( $queriedObject ) {
 
 		$order = ( $queriedObject instanceof \WP_Post ) ? \wc_get_order( $queriedObject->ID ) : $queriedObject;
 
@@ -72,18 +78,59 @@ class FullCulqi_WC_Admin {
 
 
 	/**
+	 * Resumen
+	 * @param  [type] $queriedObject
+	 * @return [type]                [description]
+	 */
+	public function metaboxResume( $queriedObject ) {
+		$order = ( $queriedObject instanceof \WP_Post ) ? \wc_get_order( $queriedObject->ID ) : $queriedObject;
+
+		$paymentType = $order->get_meta( '_culqi_payment_type' );
+
+		if ( $paymentType === 'order' ) {
+
+			$postOrderID = $order->get_meta( '_post_order_id' );
+
+			$args = [
+				'qr'	=> get_post_meta( $postOrderID, 'culqi_qr', true ),
+				'cip'	=> get_post_meta( $postOrderID, 'culqi_cip', true ),
+			];
+
+			fullculqi_get_template( 'layouts/order_resume.php', $args, FULLCULQI_WC_DIR );
+		}
+
+
+		if ( $paymentType === 'charge' ) {
+
+			$postChargeID = $order->get_meta( '_post_charge_id' );
+
+			$args = [
+				'culqi_charge_id'     => get_post_meta( $postChargeID, 'culqi_id', true ),
+				'culqi_charge_type'   => get_post_meta( $postChargeID, 'culqi_charge_type', true ),
+				'culqi_charge_auth'   => get_post_meta( $postChargeID, 'culqi_authorization', true ),
+				'culqi_charge_status' => get_post_meta( $postChargeID, 'culqi_status', true ),
+			];
+
+			fullculqi_get_template( 'layouts/charge_resume.php', $args, FULLCULQI_WC_DIR );
+		}
+
+		do_action( 'fullculqi/wc/order_resume', $order );
+	}
+
+
+	/**
 	 * Charges Column Name
 	 * @param  array $newCols]
 	 * @param  [type] $cols
 	 * @return array
 	 */
-	public function column_name( $newCols = [] ) {
+	public function columnName( array $newCols ): array {
 
-		if( ! class_exists( 'WooCommerce' ) ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
 			return $newCols;
 		}
 
-		$newCols['culqi_wc_order_id']	= esc_html__( 'WC Order', 'fullculqi' );
+		$newCols['culqi_wc_order_id'] = esc_html__( 'WC Order', 'fullculqi' );
 
 		return $newCols;
 	}
@@ -96,17 +143,18 @@ class FullCulqi_WC_Admin {
 	 * @param  integer $post_id
 	 * @return mixed
 	 */
-	public function column_value( $value = '', $col = '', $post_id = 0 ) {
-		if( $col != 'culqi_wc_order_id' )
+	public function columnValue( string $value, string $col, int $postID ) {
+		if ( $col != 'culqi_wc_order_id' ) {
 			return $value;
+		}
 
 		$value = '';
-		$order_id = get_post_meta( $post_id, 'culqi_wc_order_id', true );
+		$orderID = get_post_meta( $postID, 'culqi_wc_order_id', true );
 
-		if( ! empty( $order_id ) ) {
+		if ( ! empty( $orderID ) ) {
 			$value = sprintf(
 				'<a target="_blank" href="%s">%s</a>',
-				get_edit_post_link( $order_id ), $order_id
+				get_edit_post_link( $orderID ), $orderID
 			);
 		}
 
@@ -119,59 +167,13 @@ class FullCulqi_WC_Admin {
 	 * @param  integer $post_id
 	 * @return html
 	 */
-	public function basic_print_order( $post_id = 0 ) {
-
-		if( empty( $post_id ) )
-			return;
+	public function basicPrintWCOrder( int $postID ) {
 
 		$args = [
-			'order_id' => get_post_meta( $post_id, 'culqi_wc_order_id', true ),
+			'order_id' => get_post_meta( $postID, 'culqi_wc_order_id', true ) ?? '',
 		];
 		
 		fullculqi_get_template( 'layouts/charge_basic.php', $args, FULLCULQI_WC_DIR );
-	}
-
-
-	/**
-	 * Link Charge to WC Orders
-	 * @param  Culqi Object  $charge
-	 * @param  integer $post_id
-	 * @return mixed
-	 */
-	public function link_to_wc_orders( stdClass $charge, int $postID = 0 ) {
-
-		if ( empty( $charge ) || empty( $postID ) ) {
-			return;
-		}
-
-		$orderID = fullculqi_post_from_meta( '_culqi_charge_id', $charge->id );
-		$order   = wc_get_order( $orderID );
-
-		if( ! $order instanceof WC_Order ) {
-			return;
-		}
-
-		// WC Order Meta - Customer
-		$culqiCustomerID = get_post_meta( $postID, 'culqi_customer_id', true );
-
-		if( ! empty( $culqiCustomerID ) ) {
-			$postCustomerID = fullculqi_post_from_meta( 'culqi_id', $culqiCustomerID );
-
-			// WC Order - Charge
-			$order->update_meta_data( '_culqi_customer_id', $culqiCustomerID );
-			$order->update_meta_data( '_post_customer_id', $postCustomerID );
-		}
-
-		// Update WC Order in Charge CPT
-		update_post_meta( $postID, 'culqi_wc_order_id', $orderID );
-
-		// WC Order - Charge
-		$order->update_meta_data( '_culqi_charge_id', $charge->id );
-		$order->update_meta_data( '_post_charge_id', $postID );
-
-		$order->save_meta_data();
-
-		return true;
 	}
 
 
