@@ -45,22 +45,24 @@ class FullCulqi_WC_Process {
 		self::$log = new FullCulqi_Logs( $order->get_id() );
 
 		$notice = \sprintf(
+			/* translators: %s: Multipayment ID */
 			\esc_html__( 'Culqi Multipayment ID: %s', 'fullculqi' ), $postData['id']
 		);
 
 		self::$log->set_notice( $notice );
 
-
 		$notice = \sprintf(
+			/* translators: %s: Multipayment CIP */
 			\esc_html__( 'Culqi Multipayment CIP: %s', 'fullculqi' ), $postData['cip_code']
 		);
 
 		self::$log->set_notice( $notice );
 		$order->add_order_note( $notice );
 
-		// Status Orders
+		
 		$order->update_status( $method['multi_status'],
 			\sprintf(
+				/* translators: %s: new WC status */
 				\esc_html__( 'Status changed by FullCulqi (to %s)', 'fullculqi' ),
 				$method['multi_status']
 			)
@@ -78,6 +80,7 @@ class FullCulqi_WC_Process {
 		if ( ! $culqiOrder->success ) {
 
 			$error = \sprintf(
+				/* translators: %s: Multipayment Error */
 				\esc_html__( 'Culqi Multipayment Error: %s', 'fullculqi' ), $culqiOrder->data->message
 			);
 
@@ -89,8 +92,9 @@ class FullCulqi_WC_Process {
 		$culqiOrderID = $culqiOrder->data->culqiOrderID;
 		$postOrderID  = $culqiOrder->data->postOrderID;
 
-		// Log
+		
 		$notice = \sprintf(
+			/* translators: %s: Multipayment Post */
 			\esc_html__( 'Post Multipayment Created: %s', 'fullculqi' ), $postOrderID
 		);
 		self::$log->set_notice( $notice );
@@ -180,7 +184,9 @@ class FullCulqi_WC_Process {
 					\do_action( 'fullculqi/wc/charge/card', $card->data, $order );
 
 					if ( ! $card->success ) {
+
 						$error = \sprintf(
+							/* translators: %s: Culqi Card Error */
 							\esc_html__( 'Culqi Card Error: %s', 'fullculqi' ),
 							$card->data->message
 						);
@@ -318,6 +324,7 @@ class FullCulqi_WC_Process {
 			if ( ! $charge->success ) {
 
 				$error = \sprintf(
+					/* translators: %s: Culqi Charge Error */
 					\esc_html__( 'Culqi Charge Error: %s', 'fullculqi' ),
 					$charge->data->message
 				);
@@ -353,8 +360,8 @@ class FullCulqi_WC_Process {
 			$order->update_meta_data( '_culqi_charge_id', $culqiChargeID );
 			$order->update_meta_data( '_post_charge_id', $postChargeID );
 
-			// Log
 			$notice = \sprintf(
+				/* translators: %s: Culqi Charge Created */
 				\esc_html__( 'Culqi Charge Created: %s', 'fullculqi' ),
 				$culqiChargeID
 			);
@@ -362,9 +369,8 @@ class FullCulqi_WC_Process {
 			$order->add_order_note( $notice );
 			self::$log->set_notice( $notice );
 
-
-			// Log
 			$notice = \sprintf(
+				/* translators: %s: Culqi Charge Created */
 				\esc_html__( 'Post Charge Created: %s', 'fullculqi' ), $postChargeID
 			);
 			self::$log->set_notice( $notice );
@@ -375,6 +381,7 @@ class FullCulqi_WC_Process {
 			$status = \apply_filters( 'fullculqi/process/change_status', [
 				'name'	=> $method['status_success'],
 				'note'	=> \sprintf(
+					/* translators: %s: new WC Status */
 					\esc_html__( 'Status changed by FullCulqi (to %s)', 'fullculqi' ),
 					$method['status_success']
 				),
@@ -411,14 +418,14 @@ class FullCulqi_WC_Process {
 
 		if ( $customer->success ) {
 
-			// Log Notice
 			$notice = sprintf(
+				/* translators: %s: Culqi Customer ID */
 				esc_html__( 'Culqi Customer: %s', 'fullculqi' ), $customer->data->culqiCustomerID
 			);
 			self::$log->set_notice( $notice );
 
-			// Log
 			$notice = sprintf(
+				/* translators: %s: Culqi Customer Post */
 				esc_html__( 'Post Customer: %s', 'fullculqi' ), $customer->data->postCustomerID
 			);
 			self::$log->set_notice( $notice );
@@ -487,6 +494,7 @@ class FullCulqi_WC_Process {
 		if( ! $customer->success ) {
 			
 			$error = sprintf(
+				/* translators: %s: Culqi Customer Error */
 				esc_html__( 'Culqi Customer Error: %s', 'fullculqi' ),
 				$customer->data->message
 			);
@@ -499,8 +507,9 @@ class FullCulqi_WC_Process {
 		$culqiCustomerID = $customer->data->culqiCustomerID;
 		$postCustomerID  = $customer->data->postCustomerID;
 
-		// Log Notice
+
 		$notice = sprintf(
+			/* translators: %s: Culqi Customer Created */
 			esc_html__( 'Culqi Customer Created: %s', 'fullculqi' ), $culqiCustomerID
 		);
 		self::$log->set_notice( $notice );
@@ -509,8 +518,9 @@ class FullCulqi_WC_Process {
 		//update_post_meta( $order->get_id(), '_culqi_customer_id', $culqiCustomerID );
 		$order->update_meta_data( '_culqi_customer_id', $culqiCustomerID );
 
-		// Log
+		
 		$notice = sprintf(
+			/* translators: %s: Culqi Customer Created */
 			esc_html__( 'Post Customer Created: %s', 'fullculqi' ), $postCustomerID
 		);
 		self::$log->set_notice( $notice );

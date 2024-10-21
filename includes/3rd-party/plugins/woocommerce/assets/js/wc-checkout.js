@@ -46,13 +46,10 @@
 		 * Execute when the page is ready
 		 * @return mixed
 		 */
-		executeUIActions: async function() {
+		executeUIActions: function() {
 
-			Culqi.publicKey = fullculqi_vars.public_key;
-			Culqi3DS.publicKey = fullculqi_vars.public_key;
-			
-			FullCulqi.deviceFingerPrintID = await Culqi3DS.generateDevice();
-
+			FullCulqi.setCredentials();
+			FullCulqi.setDevice();
 			FullCulqi.setSettings();
 			FullCulqi.setOptions();
 			FullCulqi.timeModal();
@@ -73,14 +70,15 @@
 
 			window.addEventListener("message", async function (event) {
 
-				if( event.origin === window.location.origin ) {
-					const { parameters3DS, error } = event.data;
+				if ( event.origin === window.location.origin ) {
 
-					if( parameters3DS ) {
+					const { loading, parameters3DS, error } = event.data;
+
+					if ( parameters3DS ) {
 						FullCulqi.payProcess( parameters3DS );
 					}
 
-					if( error ) {
+					if ( error ) {
 						console.log( error );
 					}
 				}
@@ -93,6 +91,21 @@
 		 */
 		isSafari: function() {
 			return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+		},
+		/**
+		 * Set Culqi Credentials
+		 * @return mixed
+		 */
+		setCredentials: function() {
+			Culqi.publicKey    = fullculqi_vars.public_key;
+			Culqi3DS.publicKey = fullculqi_vars.public_key;
+		},
+		/**
+		 * Set Culqi Credentials
+		 * @return mixed
+		 */
+		setDevice: async function() {
+			FullCulqi.deviceFingerPrintID = await Culqi3DS.generateDevice();
 		},
 		/**
 		 * Set Culqi Settings
@@ -147,6 +160,9 @@
 
 			// Culqi 3Ds
 			Culqi3DS.options = {
+				showModal: true,
+				showLoading: true,
+				showIcon: true,
 				closeModalAction: () => window.location.reload(true),
 			};
 		},
@@ -282,9 +298,9 @@
 									email: Culqi.token.email,
 								}
 							};
-							
+
 							Culqi3DS.initAuthentication( Culqi.token.id );
-						
+
 						} else {
 
 							$('#fullculqi_notify').empty();

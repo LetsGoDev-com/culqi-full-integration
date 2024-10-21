@@ -1,9 +1,17 @@
 <div class="culqi_charges_box">
 	<h2 class="metabox_h2">
-		<?php printf( esc_html__( 'Culqi ID : %s','fullculqi'), $id ); ?>
+		<?php /* translators: %s: Culqi Charge ID */ ?>
+		<?php printf( esc_html__( 'Culqi ID : %s','fullculqi'), esc_attr( $id ) ); ?>
 	</h2>
 	<p class="metabox_subh2">
-		<?php printf( esc_html__( 'Charge via FullCulqi. Paid on %s. Customer IP: %s', 'fullculqi' ), $creation_date, $ip ); ?>
+		<?php /* translators: %1$s: Culqi Charge Date Creation */ ?>
+		<?php /* translators: %2$s: Culqi Charge IP */ ?>
+		<?php
+			printf(
+				esc_html__( 'Charge via FullCulqi. Paid on %1$s,. Customer IP: %2$s', 'fullculqi' ),
+				esc_attr( $creation_date ), esc_attr( $ip )
+			);
+		?>
 	</p>
 
 	<div class="metabox_column_container">
@@ -25,33 +33,33 @@
 
 						printf(
 							'<mark class="metabox_badged %s"><span>%s</span></mark>',
-							$classType, $labelType
+							esc_attr( $classType ), esc_html( $labelType )
 						);
 					?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Creation Date', 'fullculqi' ); ?> : </b>
-					<?php echo $creation_date; ?>
+					<?php echo esc_html( $creation_date ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Capture Date', 'fullculqi' ); ?> : </b>
-					<?php echo $capture_date; ?>
+					<?php echo esc_html( $capture_date ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Currency', 'fullculqi' ); ?> : </b>
-					<?php echo $currency; ?>
+					<?php echo esc_html( $currency ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Amount', 'fullculqi' ); ?> : </b>
-					<?php echo $amount; ?>
+					<?php echo esc_html( $amount ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Current Amount', 'fullculqi' ); ?> : </b>
-					<?php echo $current_amount; ?>
+					<?php echo esc_html( $current_amount ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Refund', 'fullculqi' ); ?> : </b>
-					<?php echo $refunded; ?>
+					<?php echo esc_html( $refunded ); ?>
 				</li>
 				<?php do_action( 'fullculqi/charges/basic/print_data', $post_id ); ?>
 			</ul>
@@ -59,7 +67,7 @@
 				if( ! empty( $status ) && isset( $statuses[$status] ) ) {
 					printf(
 						'<mark class="metabox_badged %s"><span>%s</span></mark>',
-						$status_class, $statuses[$status]
+						esc_attr( $status_class ), esc_html( $statuses[$status] )
 					);
 
 					if ( $can_refund ) {
@@ -67,7 +75,7 @@
 
 						printf(
 							'<a href="" id="culqi_refunds" class="metabox_simple_link" data-post="%d">%s</a>',
-							$post_id, esc_html__( 'Refund Charge', 'fullculqi' )
+							esc_attr( $post_id ), esc_html__( 'Refund Charge', 'fullculqi' )
 						);
 
 						echo '&nbsp';
@@ -85,27 +93,27 @@
 			<ul>
 				<li>
 					<b><?php esc_html_e( 'Email', 'fullculqi' ); ?> : </b>
-					<?php echo $email; ?>
+					<?php echo sanitize_email( $email ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'First Name', 'fullculqi' ); ?> : </b>
-					<?php echo $first_name; ?>
+					<?php echo esc_html( $first_name ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Last Name', 'fullculqi' ); ?> : </b>
-					<?php echo $last_name; ?>
+					<?php echo esc_html( $last_name ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'City', 'fullculqi' ); ?> : </b>
-					<?php echo $city; ?>
+					<?php echo esc_html( $city ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Country', 'fullculqi' ); ?> : </b>
-					<?php echo $country; ?>
+					<?php echo esc_html( $country ); ?>
 				</li>
 				<li>
 					<b><?php esc_html_e( 'Phone', 'fullculqi' ); ?> : </b>
-					<?php echo $phone; ?>
+					<?php echo esc_html( $phone ); ?>
 				</li>
 			</ul>
 		</div>

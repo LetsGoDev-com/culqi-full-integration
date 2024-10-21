@@ -160,6 +160,7 @@ function fullculqi_get_template( $template_name = '', $args = [], $template_path
 	$located = apply_filters( 'fullculqi/global/located', $located, $args );
 
 	if( ! file_exists( $located ) ) {
+		/* translators: %s: File Name */
 		printf( esc_html__('File %s is not exists','fullculqi'), $located );
 		return;
 	}

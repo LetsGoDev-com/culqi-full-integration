@@ -146,6 +146,7 @@ class FullCulqi_WC {
 			case 'paid' :
 
 				$notice = sprintf(
+					/* translators: %s: CIP Code */
 					esc_html__( 'The CIP %s was paid', 'fullculqi' ),
 					$cip_code
 				);
@@ -157,8 +158,10 @@ class FullCulqi_WC {
 				if( $method['status_success'] == 'wc-completed') {
 					$order->payment_complete();
 				} else {
+
 					$order->update_status( $method['status_success'],
 						sprintf(
+							/* translators: %s: new WC Status */
 							esc_html__( 'Status changed by FullCulqi (to %s)', 'fullculqi' ),
 							$method['status_success']
 						)
@@ -170,6 +173,7 @@ class FullCulqi_WC {
 			case 'expired' :
 
 				$error = sprintf(
+					/* translators: %s: CIP expired */
 					esc_html__( 'The CIP %s expired', 'fullculqi' ),
 					$cip_code
 				);
@@ -182,6 +186,7 @@ class FullCulqi_WC {
 			case 'deleted' :
 
 				$error = sprintf(
+					/* translators: %s: CIP Code to Delete */
 					esc_html__( 'The CIP %s was deleted', 'fullculqi' ),
 					$cip_code
 				);

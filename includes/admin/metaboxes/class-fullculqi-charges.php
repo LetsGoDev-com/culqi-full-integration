@@ -102,13 +102,16 @@ class FullCulqi_Metaboxes_Charges extends FullCulqi_Metaboxes {
 
 		switch( $col ) {
 
-			case 'culqi_id'			:
-					$value = get_post_meta( $post_id, 'culqi_id', true ); break;
-			case 'culqi_creation'	:
-					$value = get_post_meta( $post_id, 'culqi_creation_date', true );
-					break;
+			case 'culqi_id' :
+				$value = get_post_meta( $post_id, 'culqi_id', true );
+				break;
 
-			case 'culqi_email'		:
+			case 'culqi_creation' :
+
+				$value = get_post_meta( $post_id, 'culqi_creation_date', true );
+				break;
+
+			case 'culqi_email' :
 
 				$culqi_customer_id 	= get_post_meta( $post_id, 'culqi_customer_id', true );
 				$post_customer_id = fullculqi_post_from_meta( 'culqi_id', $culqi_customer_id );
@@ -127,21 +130,21 @@ class FullCulqi_Metaboxes_Charges extends FullCulqi_Metaboxes {
 
 				break;
 
-			//case 'culqi_currency'	: $value = $basic['culqi_currency']; break;
 			case 'culqi_amount' :
 				$value = fullculqi_format_price(
 					$basic['culqi_current_amount'] ?? 0.00, $basic['culqi_currency']
-				); 
+				);
+
 				break;
 
-			case 'culqi_refunded'	:
+			case 'culqi_refunded' :
 				$value = fullculqi_format_price(
 					$basic['culqi_amount_refunded'], $basic['culqi_currency']
 				);
+
 				break;
 
-			case 'culqi_status'		:
-
+			case 'culqi_status' :
 				$statuses = fullculqi_charges_statuses();
 				$status = get_post_meta( $post_id, 'culqi_status', true );
 	
@@ -166,7 +169,6 @@ class FullCulqi_Metaboxes_Charges extends FullCulqi_Metaboxes {
 					$class = '';
 					$label = esc_html__( 'Charge', 'fullculqi' );
 				}
-
 
 				$value = sprintf(
 					'<mark class="metabox_badged %s"><span>%s</span></mark>',

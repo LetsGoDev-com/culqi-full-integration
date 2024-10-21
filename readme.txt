@@ -1,20 +1,20 @@
-=== Culqi Integracion ===
+=== Culqi Full Integracion ===
 Contributors: gonzalesc
 Tags: culqi, full integration, payment method, peru, woocommerce
 Donate link: https://www.paypal.me/letsgodev
-Requires at least: 5.6
-Tested up to: 5.7.2
-Stable tag: 5.6
+Requires at least: 6.5.0
+Tested up to: 6.6.2
+Stable tag: 3.0.0
 Requires PHP: 5.6
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+License: GPL-3.0+
+License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 
 Podrás hacer pagos desde Woocommerce usando el servicio de Culqi, además de reembolsos, estados, logs y personalizaciones del modal de pago.
 
 == Description ==
 
-Culqi Integracion te permite sincronizar todos los pagos, ordenes y clientes con tu WordPress.
+Culqi Full Integration te permite sincronizar todos los pagos, ordenes y clientes con tu WordPress.
 
 Con este plugin podrás:
 
@@ -53,35 +53,6 @@ Con este plugin podrás:
 > * Podrás relacionar uno o varios productos con un plan de pago de Culqi.
 > * Podras usar la pasarela de pago de WooCommerce para pagos recurrentes.
 > * Podrás restringir contenido de acuerdo al tipo de suscripción.
-> * Soporte Premium
->
-
-
-
-> <strong>Woocommerce Culqi Pagos Diferidos</strong><br>
->
-> Mira la **nueva versión premium** disponible en ([https://www.letsgodev.com/product/woocommerce-culqi-pagos-diferidos/](https://bit.ly/2UkbDF1))
->
-> * Permite autorizar pagos.
-> * Permite capturar pagos con un click.
-> * Existe un nuevo estado llamado Diferido en tus pedidos
-> * Puedes personalizar el correo para este nuevo estado
-> * Es compatible con el plugin de Culqi Pago con un Click
-> * Es compatible con el plugin de Culqi Botones de pago
-> * Soporte Premium
->
-
-
-
-> <strong>Wordpress Culqi Integración Botones de Pago</strong><br>
->
-> Mira la **nueva versión premium** disponible en ([https://www.letsgodev.com/product/wordpress-culqi-integracion-botones-de-pago/](http://bit.ly/2oMUffe))
->
-> * Permite colocar botones de pago en tu website.
-> * Puedes personalizar cada botón
-> * Puedes usar botones de diferentes monedas y con diferentes montos
-> * Email personalizado por cada pago
-> * No necesitas tener instalado un ecommerce
 > * Soporte Premium
 >
 
@@ -150,6 +121,10 @@ Necesitamos validar si el servicio de Culqi está disponible, para ello te sugie
 
 
 == Changelog ==
+
+= 3.0.0 =
+* Feature: compatible with Culqi Checkout API V4
+* Feature: Compatible WC HPOS
 
 = 2.0.4 =
 * Fix: check if the product class exists

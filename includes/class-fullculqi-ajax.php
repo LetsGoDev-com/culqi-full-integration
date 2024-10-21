@@ -51,8 +51,8 @@ class FullCulqi_Ajax {
 			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
 		}
 
-		$record  = \intval( $_POST['record'] ?? 50 );
-		$afterID = \esc_html( $_POST['after_id'] ?? '' );
+		$record  = \intval( \wp_unslash( $_POST['record'] ?? 50 ) );
+		$afterID = \esc_html( \wp_unslash( $_POST['after_id'] ?? '' ) );
 
 		$charges = Charges::getInstance()->sync( $record, $afterID );
 
@@ -77,8 +77,8 @@ class FullCulqi_Ajax {
 			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
 		}
 
-		$record  = \intval( $_POST['record'] ?? 50 );
-		$afterID = \esc_html( $_POST['after_id'] ?? '' );
+		$record  = \intval( \wp_unslash( $_POST['record'] ?? 50 ) );
+		$afterID = \esc_html( \wp_unslash( $_POST['after_id'] ?? '' ) );
 
 		$orders = Orders::getInstance()->sync( $record, $afterID );
 
@@ -104,8 +104,8 @@ class FullCulqi_Ajax {
 			\wp_send_json_error( \esc_html__( 'You do not have permission.', 'fullculqi' ) );
 		}
 
-		$record  = \intval( $_POST['record'] ?? 50 );
-		$afterID = \esc_html( $_POST['after_id'] ?? '' );
+		$record  = \intval( \wp_unslash( $_POST['record'] ?? 50 ) );
+		$afterID = \esc_html( \wp_unslash( $_POST['after_id'] ?? '' ) );
 
 		$customers = Customers::getInstance()->sync( $record, $afterID );
 

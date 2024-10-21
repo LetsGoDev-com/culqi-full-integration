@@ -74,10 +74,13 @@ class FullCulqi_Settings {
 					'img_loading'		=> $img_loading,
 					'img_success'		=> $img_success,
 					'img_failure'		=> $img_failure,
+					/* translators: %s: CPT to delete */
 					'delete_loading'	=> esc_html__( 'Deleting posts from %s.', 'fullculqi' ),
 					'delete_error'		=> esc_html__( 'Error deleting a post', 'fullculqi' ),
+					/* translators: %s: number of post deleted */
 					'delete_success'	=> esc_html__( '%s : Posts deleted.', 'fullculqi' ),
 					'delete_cpts'		=> array_keys( fullculqi_get_cpts() ),
+					/* translators: %s: CPT name deleted */
 					'text_confirm'		=> sprintf( esc_html__(
 						'If you continue, you will delete all the posts in %s', 'fullculqi'
 						), implode( ',', fullculqi_get_cpts() )

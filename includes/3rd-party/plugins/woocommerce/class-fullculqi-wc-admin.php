@@ -36,6 +36,10 @@ class FullCulqi_WC_Admin {
 	 */
 	public function metaboxes( $post ) {
 
+		if ( ! class_exists('WooCommerce') ) {
+			return;
+		}
+
 		$orderScreen = \wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled()
 			? \wc_get_page_screen_id( 'shop-order' )
 			: 'shop_order';
@@ -143,12 +147,13 @@ class FullCulqi_WC_Admin {
 	 * @param  integer $post_id
 	 * @return mixed
 	 */
-	public function columnValue( string $value, string $col, int $postID ) {
-		if ( $col != 'culqi_wc_order_id' ) {
+	public function columnValue( ?string $value, string $col, int $postID ) {
+		
+		if ( $col !== 'culqi_wc_order_id' ) {
 			return $value;
 		}
 
-		$value = '';
+		$value   = '';
 		$orderID = get_post_meta( $postID, 'culqi_wc_order_id', true );
 
 		if ( ! empty( $orderID ) ) {

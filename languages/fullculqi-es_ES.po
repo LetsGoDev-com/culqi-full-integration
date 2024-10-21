@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Culqi Integration\n"
 "POT-Creation-Date: 2024-10-13 02:58-0300\n"
-"PO-Revision-Date: 2024-10-13 03:03-0300\n"
+"PO-Revision-Date: 2024-10-19 10:40-0300\n"
 "Last-Translator: \n"
 "Language-Team: Letsgodev\n"
 "Language: es\n"
@@ -157,26 +157,30 @@ msgid ""
 "Tus clientes pueden pagar con Yape, Plin y las principales billeteras "
 "móviles del país"
 msgstr ""
+"Tus clientes pueden pagar con Yape, Plin y las principales billeteras "
+"móviles del país"
 
 #: includes/3rd-party/plugins/woocommerce/class-fullculqi-wc-method.php:273
 msgid "Banca Movil"
 msgstr ""
+"Tus clientes pueden pagar con Yape, Plin y las principales billeteras "
+"móviles del país"
 
 #: includes/3rd-party/plugins/woocommerce/class-fullculqi-wc-method.php:276
 msgid "Agente y bodegas"
-msgstr ""
+msgstr "Agente y bodegas"
 
 #: includes/3rd-party/plugins/woocommerce/class-fullculqi-wc-method.php:279
 msgid "Billeteras Moviles"
-msgstr ""
+msgstr "Billeteras Moviles"
 
 #: includes/3rd-party/plugins/woocommerce/class-fullculqi-wc-method.php:282
 msgid "Cuotealo BCP"
-msgstr ""
+msgstr "Cuotealo BCP"
 
 #: includes/3rd-party/plugins/woocommerce/class-fullculqi-wc-method.php:284
 msgid "Paga en cuotas y sin tarjetas de crédito con Cuotéalo"
-msgstr ""
+msgstr "Paga en cuotas y sin tarjetas de crédito con Cuotéalo"
 
 #: includes/3rd-party/plugins/woocommerce/class-fullculqi-wc-method.php:291
 msgid "Duration"

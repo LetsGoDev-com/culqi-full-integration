@@ -13,6 +13,51 @@ use Fullculqi\Syncs\Orders;
 class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 
 	/**
+	 * Card Installment
+	 * @var string
+	 */
+	public string $installments;
+
+	/**
+	 * Multipayment
+	 * @var array
+	 */
+	public array $multipayment;
+
+	/**
+	 * Time duration of the CIP
+	 * @var int
+	 */
+	public int $multi_duration;
+
+
+	/**
+	 * WC Status to the Culqi Multipayment
+	 * @var string
+	 */
+	public string $multi_status;
+
+
+	/**
+	 * Failed message to Customer
+	 * @var string
+	 */
+	public string $msg_fail;
+
+	/**
+	 * Time to the modal appears
+	 * @var int
+	 */
+	public int $time_modal;
+
+
+	/**
+	 * Instruction to payment
+	 * @var string
+	 */
+	public string $instructions;
+
+	/**
 	 * Construct
 	 */
 	public function __construct() {
@@ -26,7 +71,8 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 		$this->has_fields		= apply_filters( 'fullculqi/method/has_fields', false );
 		$this->title			= $this->get_option( 'title' );
 		$this->installments 	= $this->get_option( 'installments', 'no' );
-		$this->multipayment 	= $this->get_option( 'multipayment', [] );
+		$multipayment 	        = $this->get_option( 'multipayment', [] );
+		$this->multipayment 	= \is_array( $multipayment ) ? $multipayment : [];
 		$this->multi_duration	= $this->get_option( 'multi_duration', 24 );
 		$this->multi_status		= $this->get_option( 'multi_status', 'wc-pending' );
 		$this->description		= $this->get_option( 'description' );
@@ -167,6 +213,7 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 
 					} else {
 						$error = sprintf(
+							/* translators: %s: Culqi Multipayment Error */
 							esc_html__( 'Culqi Multipayment Error: %s', 'fullculqi' ),
 							$culqiOrder->data->message
 						);
@@ -176,11 +223,11 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 			}
 
 		
-			$js_3ds			= 'https://3ds.culqi.com';
-			$js_library		= 'https://checkout.culqi.com/js/v4';
-			$js_checkout	= FULLCULQI_WC_URL . 'assets/js/wc-checkout.js';
-			$js_waitme		= FULLCULQI_WC_URL . 'assets/js/waitMe.min.js';
-			$css_waitme		= FULLCULQI_WC_URL . 'assets/css/waitMe.min.css';
+			$js_3ds      = 'https://3ds.culqi.com';
+			$js_library  = 'https://checkout.culqi.com/js/v4';
+			$js_checkout = FULLCULQI_WC_URL . 'assets/js/wc-checkout.js';
+			$js_waitme   = FULLCULQI_WC_URL . 'assets/js/waitMe.min.js';
+			$css_waitme  = FULLCULQI_WC_URL . 'assets/css/waitMe.min.css';
 
 			wp_enqueue_script( 'culqi-3ds-js', $js_3ds, [ 'jquery' ], false, true );
 			wp_enqueue_script( 'culqi-library-js', $js_library, [ 'jquery' ], false, true );
@@ -196,24 +243,25 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 
 			wp_localize_script( 'fullculqi-js', 'fullculqi_vars',
 				apply_filters('fullculqi/method/localize', [
-					'url_actions'	=> site_url( 'fullculqi-api/wc-actions/' ),
-					'url_success'	=> $order->get_checkout_order_received_url(),
-					'url_payment'	=> $order->get_checkout_payment_url( true ),
-					'public_key'	=> sanitize_text_field( $settings['public_key'] ),
-					'installments'	=> sanitize_title( $this->installments ),
-					'multipayment'	=> $enableMultipayment == 'yes' ? $this->multipayment : [],
-					'multi_order'	=> $enableMultipayment == 'yes' ? $culqiOrderID : '',
-					'lang'			=> fullculqi_language(),
-					'time_modal'	=> absint( $this->time_modal*1000 ),
-					'order_id'		=> $order->get_id(),
-					'commerce'		=> sanitize_text_field( $settings['commerce'] ),
-					'url_logo'		=> esc_url( $settings['logo_url'] ),
-					'currency'		=> get_woocommerce_currency(),
-					'description'	=> substr( str_pad( $desc, 5, '_' ), 0, 80 ),
-					'loading_text'	=> esc_html__( 'Loading. Please wait.', 'fullculqi' ),
-					'total'			=> fullculqi_format_total( $order->get_total() ),
-					'msg_fail'		=> sanitize_text_field( $this->msg_fail ),
-					'msg_error'		=> esc_html__( 'There was some problem in the purchase process. Try again please', 'fullculqi' ),
+					'url_actions'  => site_url( 'fullculqi-api/wc-actions/' ),
+					'url_success'  => $order->get_checkout_order_received_url(),
+					'url_payment'  => $order->get_checkout_payment_url( true ),
+					'public_key'   => sanitize_text_field( $settings['public_key'] ),
+					'installments' => sanitize_title( $this->installments ),
+					'multipayment' => $enableMultipayment == 'yes' ? $this->multipayment : [],
+					'multi_order'  => $enableMultipayment == 'yes' ? $culqiOrderID : '',
+					'lang'         => fullculqi_language(),
+					'time_modal'   => absint( $this->time_modal*1000 ),
+					'order_id'     => $order->get_id(),
+					'user_email'   => $order->get_billing_email(),
+					'commerce'     => sanitize_text_field( $settings['commerce'] ),
+					'url_logo'     => esc_url( $settings['logo_url'] ),
+					'currency'     => get_woocommerce_currency(),
+					'description'  => substr( str_pad( $desc, 5, '_' ), 0, 80 ),
+					'loading_text' => esc_html__( 'Loading. Please wait.', 'fullculqi' ),
+					'total'        => fullculqi_format_total( $order->get_total() ),
+					'msg_fail'     => sanitize_text_field( $this->msg_fail ),
+					'msg_error'    => esc_html__( 'There was some problem in the purchase process. Try again please', 'fullculqi' ),
 					'wpnonce'		=> wp_create_nonce( 'fullculqi' ),
 				], $order )
 			);
@@ -491,7 +539,9 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 		$refund = Refunds::getInstance()->create( $postChargeID, $args );
 
 		if ( ! $refund->success ) {
+
 			$error = sprintf(
+				/* translators: %s: Culqi Refund Error */
 				esc_html__( 'Culqi Refund Error : %s','fullculqi' ), $refund->data->message
 			);
 
@@ -501,6 +551,7 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 		}
 
 		$notice = sprintf(
+			/* translators: %s: Culqi Refund Created */
 			esc_html__( 'Culqi Refund created: %s', 'fullculqi' ),
 			$refund->data->culqiRefundID
 		);
@@ -632,6 +683,9 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 			$data['label'] = $data['title'];
 		}
 
+		$mutlicheckbox = $this->get_option( $key, [] );
+		$mutlicheckbox = is_array( $mutlicheckbox ) ? $mutlicheckbox : [];
+
 		ob_start();
 		?>
 		<tr valign="top">
@@ -644,7 +698,7 @@ class WC_Gateway_FullCulqi extends WC_Payment_Gateway {
 
 					<?php foreach( (array) $data['options'] as $optionKey => $optionData ) : ?>
 						<label for="<?php echo esc_attr( $optionKey ); ?>">
-							<input class="<?php echo esc_attr( $data['class'] ); ?>" type="checkbox" name="<?php echo esc_attr( $field_key ); ?>[<?php echo $optionKey; ?>]" id="<?php echo esc_attr( $field_key . '_' . $optionKey ); ?>" value="<?php echo $optionKey; ?>" <?php checked( in_array($optionKey, $this->get_option( $key, []) ), true ); ?> /> <?php echo wp_kses_post( $optionData['label'] ); ?>
+							<input class="<?php echo esc_attr( $data['class'] ); ?>" type="checkbox" name="<?php echo esc_attr( $field_key ); ?>[<?php echo $optionKey; ?>]" id="<?php echo esc_attr( $field_key . '_' . $optionKey ); ?>" value="<?php echo $optionKey; ?>" <?php checked( in_array($optionKey, $mutlicheckbox ), true ); ?> /> <?php echo wp_kses_post( $optionData['label'] ); ?>
 							<?php echo $this->get_tooltip_html( $data ); ?>
 						</label><br/>
 					<?php endforeach; ?>

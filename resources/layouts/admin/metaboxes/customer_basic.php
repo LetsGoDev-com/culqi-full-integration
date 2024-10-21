@@ -1,8 +1,10 @@
 <div class="culqi_customers_box">
 	<h2 class="metabox_h2">
+		<?php /* translators: %s: Culqi Customer ID */ ?>
 		<?php printf( esc_html__( 'Customer ID : %s','fullculqi'), $id ); ?>
 	</h2>
 	<p class="metabox_subh2">
+		<?php /* translators: %s: Culqi Customer Names */ ?>
 		<?php printf( esc_html__( 'Customer via FullCulqi: %s', 'fullculqi' ), $names ); ?>
 	</p>
 
