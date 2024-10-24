@@ -80,7 +80,6 @@ class FullCulqi_Settings {
 					/* translators: %s: number of post deleted */
 					'delete_success'	=> esc_html__( '%s : Posts deleted.', 'fullculqi' ),
 					'delete_cpts'		=> array_keys( fullculqi_get_cpts() ),
-					/* translators: %s: CPT name deleted */
 					'text_confirm'		=> sprintf( esc_html__(
 						'If you continue, you will delete all the posts in %s', 'fullculqi'
 						), implode( ',', fullculqi_get_cpts() )

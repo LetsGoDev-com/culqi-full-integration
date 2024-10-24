@@ -13,9 +13,9 @@ class fullculqi_Activator {
 
 		$settings = fullculqi_get_settings();
 
-		if( !isset($settings['commerce']) || empty($settings['commerce']) ||
-			!isset($settings['public_key']) || empty($settings['public_key']) ||
-			!isset($settings['secret_key']) || empty($settings['secret_key'])
+		if ( ! isset( $settings['commerce'] ) || empty( $settings['commerce'] ) ||
+			 ! isset( $settings['public_key'] ) || empty( $settings['public_key'] ) ||
+			 ! isset( $settings['secret_key'] ) || empty( $settings['secret_key'] )
 		) {
 			set_transient( 'fullculqi_activator', true, 30 );
 		}

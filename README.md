@@ -57,7 +57,7 @@ Una vez llenado todo correctamente, al presionar "Guardar", éste le enviará a 
 ### Cargos ###
 ![Alt text](https://www.letsgodev.com/wp-content/uploads/2021/03/base_3_charges.jpg "Charges List")
 
-### Ordenes ( PagoEfectivo ) ###
+### Ordenes ( PagoEfectivo, Yape ) ###
 ![Alt text](https://www.letsgodev.com/wp-content/uploads/2021/03/base_4_orders.jpg "Order List")
 
 ### Clientes ###
@@ -78,6 +78,14 @@ Tienes activada la pasarela de pago para WooCommerce y sólo debes ir a personal
 El log siempre está habilitado, cada pedido tendrá un detalle de todos los pasos que sigue Culqi para hacer el pago. Aqui también se registrará los errores si los hay.
 
 ![Alt text](https://www.letsgodev.com/wp-content/uploads/2015/07/log.jpg "Log")
+
+
+## Resumen de Compra ##
+
+Tenemos resumenes para el pago y para multipago en el detalle del pedido de WooCommerce
+
+![Alt text](https://www.letsgodev.com/wp-content/uploads/2024/10/fullculqi_resumen_order.jpg "Resume")
+
 
 
 ## Datos recomendados en el Checkout ##
@@ -120,6 +128,10 @@ y la URL que debes poner está en la sección Webhooks del plugin.
 ```
 https://{tuweb}/fullculqi-api/webhooks
 ```
+
+## Autenticación 3D ##
+
+Aún no es compatible, pero estamos trabajando para que lo sea.
 
 
 ## Problemas Comunes desde el servicio de Culqi ##

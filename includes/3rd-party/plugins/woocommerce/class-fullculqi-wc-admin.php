@@ -93,7 +93,8 @@ class FullCulqi_WC_Admin {
 
 		if ( $paymentType === 'order' ) {
 
-			$postOrderID = $order->get_meta( '_post_order_id' );
+			$culqiOrderID = $order->get_meta( '_culqi_order_id' );
+			$postOrderID  = fullculqi_post_from_meta( 'culqi_id', $culqiOrderID );
 
 			$args = [
 				'qr'	=> get_post_meta( $postOrderID, 'culqi_qr', true ),
@@ -106,7 +107,8 @@ class FullCulqi_WC_Admin {
 
 		if ( $paymentType === 'charge' ) {
 
-			$postChargeID = $order->get_meta( '_post_charge_id' );
+			$culqiChargeID = $order->get_meta( '_culqi_charge_id' );
+			$postChargeID  = fullculqi_post_from_meta( 'culqi_id', $culqiChargeID );
 
 			$args = [
 				'culqi_charge_id'     => get_post_meta( $postChargeID, 'culqi_id', true ),

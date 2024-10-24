@@ -19,11 +19,14 @@ Culqi Full Integration te permite sincronizar todos los pagos, ordenes y cliente
 Con este plugin podrás:
 
 * Administrar los cargos
-* Administrar las ordenes ( PagoEfectivo )
+* Administrar las ordenes ( PagoEfectivo, Yape )
 * Administrar los clientes
+* Hacer reembolsos
 * Si usas WooCommerce podrás activar el popup de Culqi como método de pago.
 * Hacer reembolsos con un click desde algún pedido de WooCommerce
 * Tener un log de actividades de Culqi para cada pedido de WooCommerce.
+* Compatibilidad con HPOS de WooCommerce
+* Tener resumen de pago en el pedido de WooCommerce
 * Agregar el logo de tu comercio a tu modal/popup de Culqi
 
 
@@ -97,6 +100,10 @@ Sí, podrás hacer pagos, ordenes y reembolsos usando WooCommerce
 = Puedo usar PagoEfectivo ? =
 
 Sí, ese modelo se llama ordenes de compra ( Multipago ) y es permitido por el plugin. Pero debes configurar un webhook para recibir las notificaciones de pago.
+
+= Es compatible con la autenticación 3D ? =
+
+Aún no, estamos trabajando para que sea compatible.
 
 = Cómo configurar el webhook de Culqi para Multipago ? =
 

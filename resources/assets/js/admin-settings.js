@@ -55,8 +55,9 @@
 			$('#fullculqi_delete_all').on('click', function(e) {
 				e.preventDefault();
 
-				if( ! confirm( fullculqi_vars.text_confirm ) )
+				if ( ! confirm( fullculqi_vars.text_confirm ) ) {
 					return;
+				}
 
 				FullCulqi.deleteCPTs();
 			});

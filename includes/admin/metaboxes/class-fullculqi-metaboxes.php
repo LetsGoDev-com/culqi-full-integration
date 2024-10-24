@@ -43,13 +43,8 @@ abstract class FullCulqi_Metaboxes {
 	public function enqueue_scripts() {
 		global $pagenow, $post, $post_type;
 
-		update_option('piki_81_'.$this->post_type, print_r( $pagenow, true));
-		update_option('piki_82_'.$this->post_type, print_r( $_GET, true));
-
 
 		$is_list = $pagenow == 'edit.php' && isset( $_GET['post_type'] ) && $_GET['post_type'] == $this->post_type;
-
-		update_option('piki_84_'.$this->post_type, print_r( $is_list, true));
 
 		$is_edit = in_array( $pagenow, [ 'post-new.php', 'post.php' ] ) && $post_type == $this->post_type;
 
@@ -87,8 +82,6 @@ abstract class FullCulqi_Metaboxes {
 
 			// JS
 			if( $is_list ) {
-
-				update_option('piki_85_'.$this->post_type, print_r( $is_list, true));
 
 				wp_enqueue_script(
 					'fullculqi-js',

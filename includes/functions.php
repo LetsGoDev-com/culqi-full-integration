@@ -125,15 +125,16 @@ function fullculqi_format_total( $total = 0 ) {
  * Check if it has posts
  * @return mixed
  */
-function fullculqi_have_posts() {
+function fullculqi_have_posts(): bool {
 
 	$cpts = array_keys( fullculqi_get_cpts() );
 
-	foreach( $cpts as $cpt ) {
-		$count_posts = wp_count_posts($cpt);
+	foreach ( $cpts as $cpt ) {
+		$count_posts = wp_count_posts( $cpt );
 
-		if( isset($count_posts->publish) && $count_posts->publish != 0 )
+		if ( isset( $count_posts->publish ) && $count_posts->publish != 0 ) {
 			return true;
+		}
 	}
 
 	return false;
