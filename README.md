@@ -5,7 +5,7 @@ Bienvenido al respositorio de Culqi Integración para WordPress. Este plugin te 
 
 ## Requisitos ##
 
-- Version PHP mínimo requerido es 5.6
+- Version PHP mínimo requerido es 7.2
 - [Credenciales de Culqi](https://www.culqi.com)
 
 
