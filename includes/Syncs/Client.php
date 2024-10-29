@@ -519,9 +519,9 @@ abstract class Client {
 	/**
 	 * Get Current Item ID by Key
 	 * @param  string $key
-	 * @return mixed
+	 * @return string
 	 */
-	public function getCurrentItemID( string $key ): mixed {
+	public function getCurrentItemID( string $key ): string {
 		return $this->currentItemIDs[ $key ] ?? '';
 	}
 
