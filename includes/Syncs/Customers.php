@@ -96,7 +96,7 @@ class Customers extends Client {
 		$posts = \get_posts( $args );
 		$post  = $posts[0] ?? null;
 
-		if ( ! $post instanceof WP_Post ) {
+		if ( ! $post ) {
 			return (object)[
 				'success' => false,
 				'data'    => (object)[ 'message' => \esc_html__( 'There is no Culqi Customer by Email', 'fullculqi' ) ],

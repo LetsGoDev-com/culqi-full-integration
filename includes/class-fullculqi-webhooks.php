@@ -59,8 +59,9 @@ class FullCulqi_Webhooks {
 		$webhooks_saved = get_option( 'fullculqi_webhooks', [] );
 
 		// Delete if it has many elements
-		if( count( $webhooks_saved ) > $this->limit )
+		if ( count( $webhooks_saved ) > $this->limit ) {
 			array_pop( $webhooks_saved );
+		}
 
 		$data = json_decode( $input->data );
 

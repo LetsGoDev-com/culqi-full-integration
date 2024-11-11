@@ -487,13 +487,15 @@ abstract class Client {
 		$postID = $this->createWPPost( $itemSingle->data->body, $itemPostID );
 
 		\do_action(
-			\sprintf( 'fullculqi/%s/get', $this->postType ), $itemSingle->data->body, $itemPostID
+			\sprintf( 'fullculqi/%s/sync_by_item', $this->postType ),
+			$itemSingle->data->body, $itemPostID
 		);
 
 		return (object)[
 			'success'	=> true,
 			'data'		=> (object)[
-				'post_id0'	=> $postID,
+				'postID' => $postID,
+				'itemID' => $itemID,
 			]
 		];
 	}

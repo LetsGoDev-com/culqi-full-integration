@@ -111,8 +111,24 @@ class Charges extends Client {
 		// If it use customer process
 		if( isset( $charge->source->object ) && $charge->source->object == 'card' ) {
 			\update_post_meta( $postID, 'culqi_ip', $charge->source->source->client->ip );
+
+			\update_post_meta( $postID, 'culqi_card', [
+				'card_number' => $charge->source->source->card_number ?? '',
+				'card_last4'  => $charge->source->source->last_four  ?? '',
+				'card_brand'  => $charge->source->source->iin->card_brand  ?? '',
+				'card_bin'    => $charge->source->source->iin->bin ?? '',
+				'card_type'   => $charge->source->source->iin->card_type  ?? '',
+			] );
 		} else {
 			\update_post_meta( $postID, 'culqi_ip', $charge->source->client->ip );
+
+			\update_post_meta( $postID, 'culqi_card', [
+				'card_number' => $charge->source->card_number ?? '',
+				'card_last4'  => $charge->source->last_four  ?? '',
+				'card_brand'  => $charge->source->iin->card_brand  ?? '',
+				'card_bin'    => $charge->source->iin->bin ?? '',
+				'card_type'   => $charge->source->iin->card_type  ?? '',
+			] );
 		}
 
 		// Token type ( card or yape )
@@ -153,6 +169,7 @@ class Charges extends Client {
 			'culqi_current_amount'	=> \round( $charge->current_amount/100, 2 ),
 			'culqi_amount_refunded'	=> \round( $charge->amount_refunded/100, 2 ),
 			'culqi_currency'		=> $charge->currency_code,
+			'culqi_installments'    => $charge->installments,
 		];
 
 		\update_post_meta( $postID, 'culqi_basic', \array_map( 'esc_html', $basic ) );
