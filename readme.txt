@@ -3,8 +3,8 @@ Contributors: gonzalesc
 Tags: culqi, full integration, payment method, peru, woocommerce
 Donate link: https://www.paypal.me/letsgodev
 Requires at least: 6.5.0
-Tested up to: 6.6.2
-Stable tag: 3.0.0
+Tested up to: 6.7.0
+Stable tag: 3.0.1
 Requires PHP: 7.2
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
