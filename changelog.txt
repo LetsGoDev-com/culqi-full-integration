@@ -1,7 +1,9 @@
+2024-12-22 - version 3.0.2
+Fix: after method when sync item
+
 2024-11-12 - version 3.0.1
 Fix: charge more information
 Fix: getCurrentItemID() return to string
-
 
 2024-10-15 - version 3.0.0
 Feature: Compatible Culqi API V4
