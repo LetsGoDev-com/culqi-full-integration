@@ -471,10 +471,11 @@ abstract class Client {
 			]
 		];
 	}
-
+	
 	/**
 	 * Get By Item ID
-	 * @param  string $itemID
+	 * @param string $itemID
+	 * @param int|null $itemPostID
 	 * @return \stdClass
 	 */
 	public function syncByItem( string $itemID, ?int $itemPostID = null ): \stdClass {
@@ -485,6 +486,8 @@ abstract class Client {
 		}
 
 		$postID = $this->createWPPost( $itemSingle->data->body, $itemPostID );
+		
+		$this->afterCreateWPPost( $itemSingle, $postID );
 
 		\do_action(
 			\sprintf( 'fullculqi/%s/sync_by_item', $this->postType ),
@@ -571,8 +574,8 @@ abstract class Client {
 
 		return empty( $wpdb->last_error );
 	}
-
-
+	
+	
 	/**
 	 * Afte create Post
 	 * @param  \stdClass $item
