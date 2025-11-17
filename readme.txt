@@ -130,6 +130,16 @@ Necesitamos validar si el servicio de Culqi está disponible, para ello te sugie
 
 == Changelog ==
 
+= 3.0.3 =
+* Fix: installments in zero
+
+= 3.0.2 =
+* Fix: after method when sync item
+
+= 3.0.1 =
+* Fix: charge more information
+* Fix: getCurrentItemID() return to string
+
 = 3.0.0 =
 * Feature: compatible with Culqi Checkout API V4
 * Feature: Compatible WC HPOS

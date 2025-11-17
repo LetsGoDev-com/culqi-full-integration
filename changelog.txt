@@ -1,3 +1,6 @@
+2025-11-15 - version 3.0.3
+Fix: installments in zero
+
 2024-12-22 - version 3.0.2
 Fix: after method when sync item
 
