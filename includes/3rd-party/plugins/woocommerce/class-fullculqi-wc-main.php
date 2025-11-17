@@ -13,7 +13,7 @@ class FullCulqi_WC {
 
 	public function __construct() {
 		// Load the method payment
-		add_action( 'plugins_loaded', [ $this, 'include_file' ] );
+		add_action( 'after_setup_theme', [ $this, 'include_file' ], 50 );
 
 		// Include Class
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'include_class' ] );

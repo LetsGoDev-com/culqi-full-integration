@@ -249,7 +249,7 @@
 						token_id		: Culqi.token.id,
 						order_id 		: fullculqi_vars.order_id,
 						country_code	: Culqi.token.client?.ip_country_code || 'PE',
-						installments	: Culqi.token.metadata?.installments || 1,
+						installments	: Culqi.token.metadata?.installments || 0,
 						device 			: FullCulqi.deviceFingerPrintID,
 						wpnonce			: fullculqi_vars.wpnonce
 					};
