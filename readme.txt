@@ -2,9 +2,9 @@
 Contributors: gonzalesc
 Tags: culqi, full integration, payment method, peru, woocommerce
 Donate link: https://www.paypal.me/letsgodev
-Requires at least: 6.6.0
-Tested up to: 6.8.3
-Stable tag: 3.0.3
+Requires at least: 11.1.0
+Tested up to: 11.1.0
+Stable tag: 3.0.4
 Requires PHP: 7.4
 License: GPL-3.0+
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -129,6 +129,10 @@ Necesitamos validar si el servicio de Culqi está disponible, para ello te sugie
 
 
 == Changelog ==
+
+= 3.0.4 =
+* Fix: payment duplicate in popup culqi
+* Feature: compatible with WordPress 11.1.x
 
 = 3.0.3 =
 * Fix: installments in zero
