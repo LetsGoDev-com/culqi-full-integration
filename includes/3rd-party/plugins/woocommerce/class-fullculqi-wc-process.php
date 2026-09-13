@@ -122,7 +122,7 @@ class FullCulqi_WC_Process {
 
 		if ( empty( $method ) ) {
 			return false;
-		}
+		}		
 
 		// Get WC Order
 		$order        = \wc_get_order( \absint( $postData['order_id'] ) );
@@ -132,6 +132,21 @@ class FullCulqi_WC_Process {
 
 		if ( ! $order instanceof \WC_Order ) {
 			return false;
+		}
+
+		$transientKey = \sprintf( 'fullculqi_charge_process_%s', $order->get_id() );
+		$blocked      = \get_transient( $transientKey ) ?: '';
+
+		if ( $blocked === 'yes' ) {
+			return true;
+		}
+
+		\set_transient( $transientKey, 'yes', 30 );
+
+
+		// If the order is already in the success status, return true
+		if ( $method['status_success'] === $order->get_status() ) {
+			return true;
 		}
 
 		// Instance Logs
@@ -484,6 +499,7 @@ class FullCulqi_WC_Process {
 			$args['country_code'] = $billing_country;
 		}
 
+		$args   = apply_filters( 'fullculqi/process/customer_args', $args, $order );
 
 		$customer = Customers::getInstance()->create(
 			get_current_user_id(), $args
